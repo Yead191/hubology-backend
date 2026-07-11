@@ -9,10 +9,37 @@ import { IUser } from "../user/user.interface"
 
 const getVendorsFromDB = async (user: JwtPayload, query: Record<string, any>,) => {
     let vendorQuery;
+
     if (user.role === USER_ROLES.ADMIN || user.role === USER_ROLES.SUPER_ADMIN) {
-        vendorQuery = new QueryBuilder(User.find({ role: USER_ROLES.VENDOR }), query).paginate().sort().search(['name', 'email', 'company']).filter().fields()
+        vendorQuery = new QueryBuilder(User.find({ role: USER_ROLES.VENDOR }), query).paginate().sort().search(['name', 'email', 'company']).filter(['availability', 'hourlyRateRange']).fields()
     } else {
-        vendorQuery = new QueryBuilder(User.find({ role: USER_ROLES.VENDOR, verified: true, status: "active" }), query).paginate().sort().search(['name', 'email', 'company']).filter().fields()
+        vendorQuery = new QueryBuilder(User.find({ role: USER_ROLES.VENDOR, verified: true, status: "active" }), query).paginate().sort().search(['name', 'email', 'company']).filter(['availability', 'hourlyRateRange']).fields()
+    }
+
+    if (query.availability) {
+        vendorQuery.modelQuery = vendorQuery.modelQuery.find({
+            'vendorProfile.availability': query.availability,
+        });
+    }
+    // filter by hourly rate
+    if (query.hourlyRateRange) {
+        const [min, max] = query.hourlyRateRange.split('-').map(Number);
+        vendorQuery.modelQuery = vendorQuery.modelQuery.find({
+            'vendorProfile.hourlyRate': {
+                $gte: min,
+                $lte: max,
+            },
+        });
+    }
+    // filter by experience
+    if (query.experienceRange) {
+        const [min, max] = query.experienceRange.split('-').map(Number);
+        vendorQuery.modelQuery = vendorQuery.modelQuery.find({
+            'vendorProfile.yearsExperience': {
+                $gte: min,
+                $lte: max,
+            },
+        });
     }
 
     const [vendors, pagination] = await Promise.all([

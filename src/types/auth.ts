@@ -42,7 +42,7 @@ export type IRegisterVendor = {
   yearsExperience: string;
   degree?: string;
   linkedin?: string;
-  hourlyRate: string;
+  hourlyRate: number;
   availability: string;
   consultationTypes: string[];
 };

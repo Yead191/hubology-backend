@@ -160,13 +160,13 @@ export const developerProfileSchema = z.object({
     .or(z.literal("")),
 
   hourlyRate: z
-    .string()
+    .number()
     .refine(
       (val) => !isNaN(Number(val)) && Number(val) > 0,
       "Hourly rate must be greater than 0"
     ),
 
-  availability: z.enum(["Full Time", "Part Time", "Freelance"]),
+  availability: z.enum(["Full Time", "Part Time", "Project Based", "Weekends Only", "Limited"]),
 
   consultationTypes: z
     .array(z.enum(["Online", "Onsite"]))

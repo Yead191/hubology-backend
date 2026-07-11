@@ -39,7 +39,7 @@ const VendorProfileSchema = new Schema<IVendorProfile>(
       default: '',
     },
     hourlyRate: {
-      type: String,
+      type: Number,
       required: true,
     },
     availability: {
@@ -114,10 +114,10 @@ const userSchema = new Schema<IUser, UserModal>(
       required: false
     },
 
-    mustChangePassword: {
-      type: Boolean,
-      default: false,
-    },
+    // mustChangePassword: {
+    //   type: Boolean,
+    //   default: false,
+    // },
 
     vendorProfile: {
       type: VendorProfileSchema,
