@@ -33,6 +33,7 @@ export type IRegisterVendor = {
   fullName: string;
   email: string;
   password: string
+  image?: string
   contactNo: string;
   company: string;
   jobTitle: string;

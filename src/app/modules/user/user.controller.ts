@@ -39,9 +39,7 @@ const updateProfile = catchAsync(
     const data = {
       ...req.body,
     };
-    if (image) {
-      data.image = image;
-    }
+
     if (req?.body?.vendorProfile) {
       data.vendorProfile = JSON.parse(req.body.vendorProfile);
     }
@@ -69,12 +67,13 @@ const uploadFile = catchAsync(async (req: Request, res: Response) => {
 
 // get all user
 const getAllUsers = catchAsync(async (req: Request, res: Response) => {
-  const result = await UserService.getAllUsersFromDB()
+  const result = await UserService.getAllUsersFromDB(req.query)
   return sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
     message: "All users retrieved successfully",
-    data: result
+    data: result.users,
+    pagination: result.pagination
   })
 })
 
@@ -102,4 +101,17 @@ const changeStatusOfUser = catchAsync(async (req: Request, res: Response) => {
   })
 })
 
-export const UserController = { createUser, getUserProfile, updateProfile, uploadFile, getAllUsers, getSingleUser, changeStatusOfUser };
+// delete user
+
+const deleteUser = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params
+  const result = await UserService.deleteUserService(id)
+  return sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "User deleted successfully",
+    data: result
+  })
+})
+
+export const UserController = { createUser, getUserProfile, updateProfile, uploadFile, getAllUsers, getSingleUser, changeStatusOfUser, deleteUser };

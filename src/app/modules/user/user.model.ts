@@ -18,10 +18,6 @@ const VendorProfileSchema = new Schema<IVendorProfile>(
       type: String,
       required: true,
     },
-    company: {
-      type: String,
-      required: true,
-    },
     bio: {
       type: String,
       required: true,
@@ -100,7 +96,7 @@ const userSchema = new Schema<IUser, UserModal>(
     },
     status: {
       type: String,
-      enum: ['active', 'blocked'],
+      enum: ['active', 'blocked', 'deleted', 'pending'],
       default: 'active',
     },
     verified: {
@@ -115,6 +111,7 @@ const userSchema = new Schema<IUser, UserModal>(
     company: {
       type: String,
       trim: true,
+      required: false
     },
 
     mustChangePassword: {

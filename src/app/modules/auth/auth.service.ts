@@ -21,6 +21,7 @@ import { User } from '../user/user.model';
 import { Response } from 'express';
 import { AuthHelper } from './auth.helper';
 import { USER_ROLES } from '../../../enums/user';
+import unlinkFile from '../../../shared/unlinkFile';
 
 //login
 const loginUserFromDB = async (payload: ILoginData, res: Response) => {
@@ -29,37 +30,27 @@ const loginUserFromDB = async (payload: ILoginData, res: Response) => {
   if (!isExistUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
   }
-  // Vendor approval check
-  if (isExistUser.role === USER_ROLES.VENDOR) {
-    const applicationStatus =
-      isExistUser.vendorProfile?.applicationStatus;
-
-    if (applicationStatus === 'pending') {
-      throw new ApiError(
-        StatusCodes.BAD_REQUEST,
-        'Your vendor application is currently under review.'
-      );
-    }
-
-    if (applicationStatus === 'rejected') {
-      throw new ApiError(
-        StatusCodes.BAD_REQUEST,
-        'Your vendor application has been rejected.'
-      );
-    }
-  }
-  //check verified and status
+  // 1. Check verified status first (applies to all users/vendors)
   if (!isExistUser.verified) {
     return await AuthHelper.unverifiedAccountHandle(email, res);
   }
 
-  //check user status
+  // 2. Check user status (blocked/pending)
   if (isExistUser.status === 'blocked') {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      'You don’t have permission to access this content.It looks like your account has been deactivated.'
+      'You don’t have permission to access this content. It looks like your account has been deactivated.'
     );
   }
+
+  if (isExistUser.status === 'pending') {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'Your application has been submitted successfully. We will review your application and notify you via email once it has been approved.'
+    );
+  }
+
+
 
   if (!password) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Password is required!');
@@ -273,75 +264,112 @@ const changePasswordToDB = async (
 
 const registerUserToDB = async (payload: IRegisterData, res: Response) => {
   const { name, email, password, company, interest } = payload;
-  const isExistUser = await User.isExistUserByEmail(email);
-  if (isExistUser) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "User already exists!");
+  const isExist = await User.findOne({ email: payload.email });
+  if (isExist) {
+    if (isExist.status === 'blocked') throw new ApiError(StatusCodes.BAD_REQUEST, 'You don’t have permission to access this content.It looks like your account has been deactivated.');
+    if (!isExist.verified) {
+      return await AuthHelper.unverifiedAccountHandle(payload.email!, res);
+    }
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Email already exist!');
+
   }
-  const hashPassword = await bcrypt.hash(
-    password,
-    Number(config.bcrypt_salt_rounds)
+
+
+  const data = { name, email, password, role: USER_ROLES.USER, company, interest, verified: false, status: 'active' }
+  const createUser = await User.create(data);
+  if (!createUser) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create user');
+  }
+
+  //send email
+  const otp = generateOTP();
+  const values = {
+    name: createUser.name,
+    otp: otp,
+    email: createUser.email!,
+  };
+  const createAccountTemplate = emailTemplate.createAccount(values);
+  emailHelper.sendEmail(createAccountTemplate);
+
+  //save to DB
+  const authentication = {
+    oneTimeCode: otp,
+    expireAt: new Date(Date.now() + 3 * 60000),
+  };
+  await User.findOneAndUpdate(
+    { _id: createUser._id },
+    { $set: { authentication } }
   );
 
-
-  const data = { name, email, password: hashPassword, role: USER_ROLES.USER, company, interest, verified: false, status: 'active' }
-  const createUser = await User.create(data);
-  if (createUser) {
-    await AuthHelper.unverifiedAccountHandle(email, res);
-  }
   return createUser;
 }
 
-const registerVendorToDB = async (payload: IRegisterVendor, res: Response) => {
-  const {
-    fullName,
-    email,
-    password,
-    contactNo,
-    company,
-    jobTitle,
-    bio,
-    expertise,
-    yearsExperience,
-    degree,
-    linkedin,
-    hourlyRate,
-    availability,
-    consultationTypes,
-  } = payload;
-  const isExistUser = await User.isExistUserByEmail(email)
-  if (isExistUser) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "User already exists!");
-  }
+const registerVendorToDB = async (payload: any, res: Response) => {
+  console.log(payload);
 
-  const hashPassword = await bcrypt.hash(
-    password,
-    Number(config.bcrypt_salt_rounds)
-  );
-  const data = {
-    name: fullName,
-    email,
-    password: hashPassword,
-    role: USER_ROLES.VENDOR,
-    verified: false,
-    vendorProfile: {
-      jobTitle,
-      contactNo,
-      company,
-      bio,
-      expertise,
-      yearsExperience,
-      degree,
-      linkedin,
-      hourlyRate,
-      availability,
-      consultationTypes,
-      applicationStatus: 'pending',
+  const payloadData = payload.body || payload;
+  const email = payloadData.email;
+  const image = payload.image || payloadData.image;
+
+  try {
+    const isExist = await User.isExistUserByEmail(email);
+    if (isExist) {
+      // Clean up the newly uploaded image since registration won't proceed
+      if (image) {
+        unlinkFile(image);
+      }
+
+      if (isExist.status === 'blocked') {
+        throw new ApiError(
+          StatusCodes.BAD_REQUEST,
+          'You don’t have permission to access this content. It looks like your account has been deactivated.'
+        );
+      }
+      if (!isExist.verified) {
+        return await AuthHelper.unverifiedAccountHandle(email, res);
+      }
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Email already exist!');
     }
 
+    const createVendor = await User.create({
+      ...payload,
+      role: USER_ROLES.VENDOR,
+      status: "pending"
+    });
+    if (!createVendor) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create user');
+    }
+
+    // Send email
+    const otp = generateOTP();
+    const values = {
+      name: createVendor.name,
+      otp: otp,
+      email: createVendor.email!,
+    };
+    const createAccountTemplate = emailTemplate.createAccount(values);
+    emailHelper.sendEmail(createAccountTemplate);
+
+    // Save OTP to DB
+    const authentication = {
+      oneTimeCode: otp,
+      expireAt: new Date(Date.now() + 3 * 60000),
+    };
+    await User.findOneAndUpdate(
+      { _id: createVendor._id },
+      { $set: { authentication } }
+    );
+
+    return createVendor;
+  } catch (error) {
+    // Clean up newly uploaded image on database or mailer failure
+    if (image) {
+      unlinkFile(image);
+    }
+    throw error;
   }
-  const result = await User.create(data)
-  return result
-}
+};
+
 
 export const AuthService = {
   verifyEmailToDB,

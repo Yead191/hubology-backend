@@ -30,7 +30,7 @@ router
     UserController.createUser
   ).get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), UserController.getAllUsers)
 
-router.route("/:id").get(auth(), UserController.getSingleUser)
+router.route("/:id").get(auth(), UserController.getSingleUser).delete(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), UserController.deleteUser)
 router.route("/:id/change-status").patch(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), UserController.changeStatusOfUser)
 
 router.route('/upload-file').post(fileUploadHandler(), UserController.uploadFile);

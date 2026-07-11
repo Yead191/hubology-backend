@@ -11,6 +11,7 @@ import { User } from './user.model';
 import { AuthHelper } from '../auth/auth.helper';
 import { Response } from 'express';
 import mongoose from 'mongoose';
+import QueryBuilder from '../../builder/QueryBuilder';
 
 const createUserToDB = async (payload: Partial<IUser>, res: Response) => {
   const isExist = await User.findOne({ email: payload.email });
@@ -99,9 +100,16 @@ const updateProfileToDB = async (
   return updateDoc;
 };
 
-const getAllUsersFromDB = async (): Promise<Partial<IUser>[]> => {
-  const users = await User.find();
-  return users;
+const getAllUsersFromDB = async (query: Record<string, any>) => {
+  // const userQuery = new QueryBuilder(User.find({ role: { $nin: [USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN] }, verified: true }), query).paginate().sort().search(['name', 'email']).filter().fields()
+  const userQuery = new QueryBuilder(User.find({ role: USER_ROLES.USER, verified: true }), query).paginate().sort().search(['name', 'email']).filter().fields()
+
+  const [users, pagination] = await Promise.all([
+    userQuery.modelQuery.lean(),
+    userQuery.getPaginationInfo()
+  ])
+
+  return { users, pagination }
 };
 
 const getUserService = async (user: JwtPayload, id: any) => {
@@ -115,7 +123,7 @@ const getUserService = async (user: JwtPayload, id: any) => {
     result = await User.findById(id);
   } else {
     result = await User.findById(id).select(
-      'name email role company interest vendorProfile verified status'
+      'name email role company interest verified status'
     );
   }
 
@@ -140,11 +148,22 @@ const changeStatusOfUser = async (id: string) => {
 
 }
 
+const deleteUserService = async (id: string) => {
+  const isExistUser = await User.findById(id)
+  if (!isExistUser) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!")
+  }
+  const result = await User.deleteOne({ _id: id })
+  return result
+}
+
+
 export const UserService = {
   createUserToDB,
   getUserProfileFromDB,
   updateProfileToDB,
   getAllUsersFromDB,
   getUserService,
-  changeStatusOfUser
+  changeStatusOfUser,
+  deleteUserService
 };

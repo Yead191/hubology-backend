@@ -1,9 +1,10 @@
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import { USER_ROLES } from '../../../enums/user';
 import auth from '../../middlewares/auth';
 import validateRequest from '../../middlewares/validateRequest';
 import { AuthController } from './auth.controller';
 import { AuthValidation } from './auth.validation';
+import fileUploadHandler from '../../middlewares/fileUploadHandler';
 const router = express.Router();
 
 router.post(
@@ -38,6 +39,6 @@ router.post(
 );
 // router.post('/register', validateRequest(AuthValidation.createRegisterZodSchema), AuthController.registerUser)
 router.post('/register', validateRequest(AuthValidation.createRegisterUserZodSchema), AuthController.registerUser)
-router.post('/register/vendor', validateRequest(AuthValidation.createRegisterVendorZodSchema), AuthController.registerVendor)
+router.post('/register/vendor', fileUploadHandler(), validateRequest(AuthValidation.createRegisterVendorZodSchema), AuthController.registerVendor)
 
 export const AuthRoutes = router;

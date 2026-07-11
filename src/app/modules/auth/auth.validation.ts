@@ -83,7 +83,7 @@ const createRegisterUserZodSchema = z.object({
 const createRegisterVendorZodSchema = z.object({
   body: z.object({
     // Basic Information
-    fullName: z
+    name: z
       .string({
         required_error: 'Full name is required',
       })
@@ -95,11 +95,11 @@ const createRegisterVendorZodSchema = z.object({
       })
       .email('Please provide a valid email'),
 
-    contactNo: z
+    password: z
       .string({
-        required_error: 'Contact number is required',
+        required_error: 'Password is required',
       })
-      .regex(/^[+()\-\s\d]+$/, 'Enter a valid contact number'),
+      .min(8, 'Password must be at least 8 characters'),
 
     company: z
       .string({
@@ -107,63 +107,76 @@ const createRegisterVendorZodSchema = z.object({
       })
       .min(2, 'Please enter your company'),
 
-    jobTitle: z
-      .string({
-        required_error: 'Job title is required',
-      })
-      .min(2, 'Please enter your job title'),
+    vendorProfile: z.string().refine((value) => {
+      const parseData = JSON.parse(value)
+      const validData = developerProfileSchema.parse(parseData)
+      return !!validData
+    })
+  })
+})
 
-    bio: z
-      .string({
-        required_error: 'Bio is required',
-      })
-      .min(40, 'Tell members a bit more about yourself')
-      .max(600, 'Bio should be under 600 characters'),
 
-    // Expertise
-    expertise: z
-      .array(z.string())
-      .min(1, 'Select at least one area of expertise')
-      .max(6, 'Maximum 6 expertise areas'),
+export const developerProfileSchema = z.object({
+  jobTitle: z
+    .string()
+    .min(2, "Job title is required")
+    .max(100, "Job title is too long"),
 
-    yearsExperience: z.string({
-      required_error: 'Years of experience is required',
-    }),
+  contactNo: z
+    .string()
+    .min(10, "Invalid contact number")
+    .max(20, "Invalid contact number")
+    .regex(/^\+?[0-9]+$/, "Invalid phone number"),
 
-    degree: z.string().optional(),
+  bio: z
+    .string()
+    .min(10, "Bio must be at least 10 characters")
+    .max(500, "Bio cannot exceed 500 characters"),
 
-    linkedin: z
-      .string()
-      .trim()
-      .refine(
-        value =>
-          !value ||
-          /(^https?:\/\/)?([\w-]+\.)*linkedin\.com\/.+/i.test(value),
-        {
-          message: 'Enter a valid LinkedIn profile URL',
-        }
-      )
-      .optional(),
+  expertise: z
+    .array(z.string().min(1))
+    .min(1, "Select at least one expertise")
+    .refine(
+      (items) => new Set(items).size === items.length,
+      "Expertise must not contain duplicates"
+    ),
 
-    // Consulting
-    hourlyRate: z.string({
-      required_error: 'Hourly rate is required',
-    }),
+  yearsExperience: z
+    .string()
+    .refine(
+      (val) => !isNaN(Number(val)) && Number(val) >= 0,
+      "Years of experience must be a valid number"
+    ),
 
-    availability: z.string({
-      required_error: 'Availability is required',
-    }),
+  degree: z
+    .string()
+    .min(2, "Degree is required")
+    .max(100),
 
-    consultationTypes: z
-      .array(z.string())
-      .min(1, 'Select at least one consultation type'),
+  linkedin: z
+    .string()
+    .url("Invalid LinkedIn URL")
+    .optional()
+    .or(z.literal("")),
 
-    agree: z.literal(true, {
-      errorMap: () => ({
-        message: 'You must accept the terms and conditions',
-      }),
-    }),
-  }),
+  hourlyRate: z
+    .string()
+    .refine(
+      (val) => !isNaN(Number(val)) && Number(val) > 0,
+      "Hourly rate must be greater than 0"
+    ),
+
+  availability: z.enum(["Full Time", "Part Time", "Freelance"]),
+
+  consultationTypes: z
+    .array(z.enum(["Online", "Onsite"]))
+    .min(1, "Select at least one consultation type"),
+
+  applicationStatus: z.enum([
+    "pending",
+    "approved",
+    "rejected",
+  ]),
 });
 
 

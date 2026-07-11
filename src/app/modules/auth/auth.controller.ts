@@ -1,8 +1,9 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
 import { AuthService } from './auth.service';
+import { getSingleFilePath } from '../../../shared/getFilePath';
 
 const verifyEmail = catchAsync(async (req: Request, res: Response) => {
   const { ...verifyData } = req.body;
@@ -78,15 +79,21 @@ const registerUser = catchAsync(async (req: Request, res: Response) => {
 });
 
 
-const registerVendor = catchAsync(async (req: Request, res: Response) => {
+const registerVendor = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  let image = getSingleFilePath(req.files, 'image')
+  const data = { ...req.body }
+  if (image) {
+    data.image = image;
+  }
+  if (req?.body?.vendorProfile) {
+    data.vendorProfile = JSON.parse(req.body.vendorProfile);
+  }
+  const result = await AuthService.registerVendorToDB(data, res)
 
-  const { ...vendorData } = req.body
-  const result = await AuthService.registerVendorToDB(vendorData, res)
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
-    message:
-      'Your application has been submitted successfully. We will review your application and notify you via email once it has been approved.',
+    message: 'Your registration was successful. Please check your email for the verification OTP.',
     data: result,
   })
 

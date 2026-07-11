@@ -28,7 +28,7 @@ export interface IUser {
 
   verified: boolean;
 
-  status: 'active' | 'blocked' | 'deleted';
+  status: 'active' | 'blocked' | 'deleted' | 'pending';
 
   mustChangePassword: boolean;
 
