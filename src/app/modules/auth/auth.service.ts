@@ -22,11 +22,13 @@ import { Response } from 'express';
 import { AuthHelper } from './auth.helper';
 import { USER_ROLES } from '../../../enums/user';
 import unlinkFile from '../../../shared/unlinkFile';
+import { NotificationServices } from '../notification/notification.service';
 
 //login
 const loginUserFromDB = async (payload: ILoginData, res: Response) => {
   const { email, password } = payload;
   const isExistUser = await User.findOne({ email }).select('+password');
+  // console.log(isExistUser)
   if (!isExistUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
   }
@@ -49,8 +51,11 @@ const loginUserFromDB = async (payload: ILoginData, res: Response) => {
       'Your application has been submitted successfully. We will review your application and notify you via email once it has been approved.'
     );
   }
-
-
+  if (isExistUser.status === 'rejected') {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST, `Your application is rejected. Reason: ${isExistUser.rejectionReason}`
+    )
+  }
 
   if (!password) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Password is required!');
@@ -274,13 +279,17 @@ const registerUserToDB = async (payload: IRegisterData, res: Response) => {
 
   }
 
-
   const data = { name, email, password, role: USER_ROLES.USER, company, interest, verified: false, status: 'active' }
   const createUser = await User.create(data);
   if (!createUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create user');
   }
-
+  NotificationServices.sendNotificationToAdmins({
+    title: "New User Registration",
+    message: `${createUser.name} has registered as a new user`,
+    refId: createUser._id,
+    path: `/user/${createUser._id}`
+  });
   //send email
   const otp = generateOTP();
   const values = {
@@ -340,6 +349,12 @@ const registerVendorToDB = async (payload: any, res: Response) => {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create user');
     }
 
+    NotificationServices.sendNotificationToAdmins({
+      title: "New Vendor Registration",
+      message: `${createVendor.name} has registered as a new Vendor`,
+      refId: createVendor._id,
+      path: `/vendor/profile/${createVendor._id}`
+    });
     // Send email
     const otp = generateOTP();
     const values = {

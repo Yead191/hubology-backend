@@ -29,9 +29,9 @@ const getSingleVendor = catchAsync(async (req: Request, res: Response) => {
 })
 const changeVendorStatus = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params
-    const { status } = req.body
+    const { status, rejectionReason } = req.body
     console.log(status, id)
-    const result = await VendorService.changeVendorStatus(id, { status })
+    const result = await VendorService.changeVendorStatus(id, { status, rejectionReason })
     return sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,

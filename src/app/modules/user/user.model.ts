@@ -96,8 +96,12 @@ const userSchema = new Schema<IUser, UserModal>(
     },
     status: {
       type: String,
-      enum: ['active', 'blocked', 'deleted', 'pending'],
+      enum: ['active', 'blocked', 'rejected', 'pending',],
       default: 'active',
+    },
+    rejectionReason: {
+      type: String,
+      default: ''
     },
     verified: {
       type: Boolean,

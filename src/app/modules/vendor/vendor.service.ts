@@ -61,7 +61,8 @@ const getSingleVendorFromDB = async (id: string) => {
     return isVendorExist
 }
 
-const changeVendorStatus = async (id: string, payload: Pick<IUser, "status">) => {
+const changeVendorStatus = async (id: string, payload: Pick<IUser, any>) => {
+    // console.log(payload)
     if (!mongoose.Types.ObjectId.isValid(id)) {
         throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid user id");
     }
@@ -72,7 +73,7 @@ const changeVendorStatus = async (id: string, payload: Pick<IUser, "status">) =>
     const result = await User.updateOne({
         _id: id,
 
-    }, { $set: { status: payload.status } })
+    }, { $set: { status: payload.status, rejectionReason: payload.status === "rejected" ? payload.rejectionReason : null } })
     if (!result.modifiedCount) {
         throw new ApiError(StatusCodes.BAD_REQUEST, "Vendor status not changed");
     }
