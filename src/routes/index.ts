@@ -4,6 +4,7 @@ import { UserRoutes } from '../app/modules/user/user.route';
 import { VendorRoutes } from '../app/modules/vendor/vendor.route';
 import { BookRoutes } from '../app/modules/book/book.route';
 import { NotificationRoutes } from '../app/modules/notification/notification.route';
+import { ServicesRoutes } from '../app/modules/services/services.route';
 const router = express.Router();
 
 const apiRoutes = [
@@ -26,6 +27,10 @@ const apiRoutes = [
   {
     path: "/notification",
     route: NotificationRoutes
+  },
+  {
+    path: "/services",
+    route: ServicesRoutes
   }
 ];
 

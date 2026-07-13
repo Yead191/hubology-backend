@@ -5,6 +5,7 @@ import ApiError from "../../../errors/ApiError";
 import { StatusCodes } from "http-status-codes";
 import { User } from "../user/user.model";
 import { USER_ROLES } from "../../../enums/user";
+import { JwtPayload } from "jsonwebtoken";
 
 const createNotification = async (data: INotification) => {
     const result = await Notification.create(data);
@@ -35,8 +36,8 @@ const sendNotificationToAdmins = async (payload: {
     );
 };
 
-const getAllNotifications = async (query: Record<string, any>) => {
-    const notificationsQuery = new QueryBuilder(Notification.find().populate('sender receiver'), query)
+const getAllNotifications = async (user: JwtPayload, query: Record<string, any>) => {
+    const notificationsQuery = new QueryBuilder(Notification.find({ receiver: user.id }).populate('sender', 'name email image _id').populate('receiver', '_id'), query)
         .search(['title', 'message'])
         .filter()
         .fields()

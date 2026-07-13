@@ -5,7 +5,7 @@ import catchAsync from '../../../shared/catchAsync';
 import { NotificationServices } from './notification.service';
 
 const getAllNotifications = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const result = await NotificationServices.getAllNotifications(req.query);
+    const result = await NotificationServices.getAllNotifications(req.user, req.query);
     return sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,
