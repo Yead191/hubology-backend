@@ -1,12 +1,10 @@
-import { JwtPayload } from 'jsonwebtoken';
 import { NotificationServices } from '../notification/notification.service';
-import { IService, ServicesModel } from './services.interface';
+import { IService } from './services.interface';
 import { Services } from './services.model';
 import mongoose from 'mongoose';
 import ApiError from '../../../errors/ApiError';
 import { StatusCodes } from 'http-status-codes';
 import unlinkFile from '../../../shared/unlinkFile';
-
 
 
 const createService = async (payload: IService) => {

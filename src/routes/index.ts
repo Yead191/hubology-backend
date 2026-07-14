@@ -5,6 +5,7 @@ import { VendorRoutes } from '../app/modules/vendor/vendor.route';
 import { BookRoutes } from '../app/modules/book/book.route';
 import { NotificationRoutes } from '../app/modules/notification/notification.route';
 import { ServicesRoutes } from '../app/modules/services/services.route';
+import { CommunityRoutes } from '../app/modules/community/community.route';
 const router = express.Router();
 
 const apiRoutes = [
@@ -31,7 +32,11 @@ const apiRoutes = [
   {
     path: "/services",
     route: ServicesRoutes
-  }
+  },
+  {
+    path: "/posts",
+    route: CommunityRoutes
+  },
 ];
 
 apiRoutes.forEach(route => router.use(route.path, route.route));
