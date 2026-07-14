@@ -10,6 +10,6 @@ const router = express.Router();
 
 router.route('/').get(CommunityController.getAllPosts).post(auth(USER_ROLES.USER, USER_ROLES.VENDOR), fileUploadHandler(), validateRequest(CommunityValidations.createCommunity), CommunityController.createPost)
 
-router.route('/:id').patch(auth(USER_ROLES.USER, USER_ROLES.VENDOR), validateRequest(CommunityValidations.createCommunity), CommunityController.updatePost).delete(auth(USER_ROLES.USER, USER_ROLES.VENDOR), CommunityController.deletePost)
+router.route('/:id').patch(auth(USER_ROLES.USER, USER_ROLES.VENDOR), validateRequest(CommunityValidations.updateCommunity), CommunityController.updatePost).delete(auth(USER_ROLES.USER, USER_ROLES.VENDOR), CommunityController.deletePost)
 
 export const CommunityRoutes = router;

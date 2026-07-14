@@ -8,6 +8,15 @@ const createCommunity = z.object({
     })
 })
 
+
+const updateCommunity = z.object({
+    body: z.object({
+        category: z.string().optional(),
+        content: z.string().optional(),
+    }).strict()
+})
+
 export const CommunityValidations = {
-    createCommunity
+    createCommunity,
+    updateCommunity
 };
