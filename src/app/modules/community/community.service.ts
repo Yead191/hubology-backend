@@ -1,11 +1,13 @@
 import { JwtPayload } from 'jsonwebtoken';
-import { CommunityModel, ICommunity } from './community.interface';
+import { ICommunity } from './community.interface';
 import ApiError from '../../../errors/ApiError';
 import { StatusCodes } from 'http-status-codes';
 import unlinkFile from '../../../shared/unlinkFile';
 import { Community } from './community.model';
 import { USER_ROLES } from '../../../enums/user';
 import QueryBuilder from '../../builder/QueryBuilder';
+import mongoose from 'mongoose';
+import { Like } from '../like/like.model';
 
 const createPostToDB = async (user: JwtPayload, payload: ICommunity) => {
     if (!user) {
@@ -36,11 +38,34 @@ const getAllPostsFromDB = async (user: JwtPayload, query: Record<string, any>) =
         })
     }
 
-    const [posts, pagination] = await Promise.all([
+    let [posts, pagination] = await Promise.all([
         postsQuery.modelQuery.lean(),
         postsQuery.getPaginationInfo()
     ])
+
+    posts = await Promise.all(posts.map(async post => {
+        const isLiked = await Like.isLikeByMe(user.id as any, post._id as any)
+        return {
+            ...post,
+            isLiked
+        }
+    }))
     return { posts, pagination }
+}
+
+const getSinglePostFromDB = async (id: string, user: JwtPayload) => {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid user id');
+    }
+    const isPostExist = await Community.findById(id).populate("author", "name email image").lean()
+    if (!isPostExist) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, "Post doesn't exist!")
+    }
+    const isLikeByMe = await Like.isLikeByMe(user.id as any, id as any)
+
+    return {
+        ...isPostExist, isLikeByMe
+    }
 }
 
 const updatePostToDB = async (user: JwtPayload, payload: ICommunity, postId: string) => {
@@ -76,9 +101,28 @@ const deletePostFromDB = async (user: JwtPayload, id: string) => {
 }
 
 
+// get my post
+const getMyPosts = async (user: JwtPayload, query: Record<string, any>) => {
+    if (!user || !user.id) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!")
+    }
+    const myPostsQuery = new QueryBuilder(Community.find({ author: user.id }), query).search(['title', 'category']).filter().sort().paginate().fields().populate(["author"], {
+        author: "name email image"
+    })
+
+    const [myPosts, pagination] = await Promise.all([
+        myPostsQuery.modelQuery.lean(),
+        myPostsQuery.getPaginationInfo()
+    ])
+    return { myPosts, pagination }
+
+}
+
 export const CommunityServices = {
     createPostToDB,
     getAllPostsFromDB,
     updatePostToDB,
-    deletePostFromDB
+    deletePostFromDB,
+    getSinglePostFromDB,
+    getMyPosts
 };

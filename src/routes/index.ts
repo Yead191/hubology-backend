@@ -6,6 +6,7 @@ import { BookRoutes } from '../app/modules/book/book.route';
 import { NotificationRoutes } from '../app/modules/notification/notification.route';
 import { ServicesRoutes } from '../app/modules/services/services.route';
 import { CommunityRoutes } from '../app/modules/community/community.route';
+import { LikeRoutes } from '../app/modules/like/like.route';
 const router = express.Router();
 
 const apiRoutes = [
@@ -36,6 +37,10 @@ const apiRoutes = [
   {
     path: "/posts",
     route: CommunityRoutes
+  },
+  {
+    path: "/like",
+    route: LikeRoutes
   },
 ];
 

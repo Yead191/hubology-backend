@@ -24,13 +24,13 @@ const createPost = catchAsync(async (req: Request, res: Response) => {
 
 const getAllPosts = catchAsync(async (req: Request, res: Response) => {
     const user = req.user
-    console.log(user)
     const result = await CommunityServices.getAllPostsFromDB(user, req.query)
     return sendResponse(res, {
         statusCode: StatusCodes.OK,
         success: true,
         message: "Posts fetched successfully",
-        data: result
+        data: result?.posts,
+        pagination: result?.pagination
     })
 })
 
@@ -60,4 +60,27 @@ const deletePost = catchAsync(async (req: Request, res: Response) => {
     })
 })
 
-export const CommunityController = { createPost, getAllPosts, updatePost, deletePost };
+const getSignglePost = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params
+    const result = await CommunityServices.getSinglePostFromDB(id, req.user)
+    return sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: "Post fetched successfully",
+        data: result
+    })
+})
+
+const getMyPosts = catchAsync(async (req: Request, res: Response) => {
+    const user = req.user
+    const result = await CommunityServices.getMyPosts(user, req.query)
+    return sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        success: true,
+        message: "My posts fetched successfully",
+        data: result?.myPosts,
+        pagination: result?.pagination
+    })
+})
+
+export const CommunityController = { createPost, getAllPosts, updatePost, deletePost, getSignglePost, getMyPosts };

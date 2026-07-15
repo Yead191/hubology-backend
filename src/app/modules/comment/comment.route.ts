@@ -3,6 +3,6 @@ import { CommentController } from './comment.controller';
 
 const router = express.Router();
 
-router.get('/', CommentController); 
+router.get('/', CommentController);
 
 export const CommentRoutes = router;

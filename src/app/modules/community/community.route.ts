@@ -8,8 +8,14 @@ import validateRequest from '../../middlewares/validateRequest';
 
 const router = express.Router();
 
-router.route('/').get(CommunityController.getAllPosts).post(auth(USER_ROLES.USER, USER_ROLES.VENDOR), fileUploadHandler(), validateRequest(CommunityValidations.createCommunity), CommunityController.createPost)
+router.route('/').get(auth(USER_ROLES.USER, USER_ROLES.VENDOR, USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), CommunityController.getAllPosts).post(auth(USER_ROLES.USER, USER_ROLES.VENDOR), fileUploadHandler(), validateRequest(CommunityValidations.createCommunity), CommunityController.createPost)
 
-router.route('/:id').patch(auth(USER_ROLES.USER, USER_ROLES.VENDOR), validateRequest(CommunityValidations.updateCommunity), CommunityController.updatePost).delete(auth(USER_ROLES.USER, USER_ROLES.VENDOR), CommunityController.deletePost)
+
+router.route('/my-posts').get(auth(USER_ROLES.USER, USER_ROLES.VENDOR), CommunityController.getMyPosts)
+
+
+router.route('/:id').get(auth(USER_ROLES.USER, USER_ROLES.VENDOR, USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), CommunityController.getSignglePost).patch(auth(USER_ROLES.USER, USER_ROLES.VENDOR), validateRequest(CommunityValidations.updateCommunity), CommunityController.updatePost).delete(auth(USER_ROLES.USER, USER_ROLES.VENDOR), CommunityController.deletePost)
+
+
 
 export const CommunityRoutes = router;

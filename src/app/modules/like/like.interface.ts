@@ -1,7 +1,11 @@
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 export type ILike = {
-  // Define the interface for Like here
+  post: Types.ObjectId,
+  user: Types.ObjectId
 };
 
-export type LikeModel = Model<ILike>;
+
+export type LikeModel = Model<ILike> & {
+  isLikeByMe: (userId: Types.ObjectId, postId: Types.ObjectId) => Promise<boolean>;
+};
