@@ -71,7 +71,7 @@ const getMyLikeFromDB = async (user: JwtPayload, query: Record<string, any>) => 
                 select: 'category content author totalLikes totalComments',
                 populate: {
                     path: 'author',
-                    select: 'name email profile',
+                    select: 'name image role',
                 },
             }),
         query

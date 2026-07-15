@@ -29,12 +29,12 @@ const getAllPostsFromDB = async (user: JwtPayload, query: Record<string, any>) =
 
     if (user?.role === USER_ROLES.SUPER_ADMIN || user?.role === USER_ROLES.ADMIN) {
         postsQuery = new QueryBuilder(Community.find(), query).search(['title', 'category']).filter().sort().paginate().fields().populate(["author"], {
-            author: "name email image"
+            author: "name role image"
         })
     }
     else {
         postsQuery = new QueryBuilder(Community.find({ status: { $nin: "removed" } }), query).search(['title', 'category',]).filter().sort().paginate().fields().populate(["author"], {
-            author: "name email image"
+            author: "name role image"
         })
     }
 
