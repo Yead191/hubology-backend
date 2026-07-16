@@ -5,6 +5,8 @@ import ApiError from '../../../errors/ApiError';
 import { StatusCodes } from 'http-status-codes';
 import { Comment } from './comment.model';
 import QueryBuilder from '../../builder/QueryBuilder';
+import { User } from '../user/user.model';
+import { Notification } from '../notification/notification.model';
 
 
 const createCommentToDB = async (user: JwtPayload, postId: string, payload: IComment) => {
@@ -21,6 +23,17 @@ const createCommentToDB = async (user: JwtPayload, postId: string, payload: ICom
         author: user.id
     }
     const result = await Comment.create(comment)
+    if (result) {
+        const commentedBy = await User.findById({ _id: user.id })
+        await Notification.create({
+            receiver: post.author,
+            title: `${commentedBy?.name} commented on your post`,
+            seen: false,
+            path: `/forum/${postId}`,
+            refId: postId,
+            type: "comment"
+        })
+    }
     await Community.findByIdAndUpdate(postId, { $inc: { totalComments: 1 } })
     return result
 }

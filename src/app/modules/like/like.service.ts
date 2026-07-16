@@ -5,6 +5,8 @@ import ApiError from '../../../errors/ApiError';
 import { StatusCodes } from 'http-status-codes';
 import { Like } from './like.model';
 import QueryBuilder from '../../builder/QueryBuilder';
+import { Notification } from '../notification/notification.model';
+import { User } from '../user/user.model';
 
 const toggleLikeToDB = async (user: JwtPayload, postId: string) => {
     const post = await Community.findById({ _id: postId })
@@ -22,10 +24,19 @@ const toggleLikeToDB = async (user: JwtPayload, postId: string) => {
     if (existingLike) {
         await Like.findByIdAndDelete(existingLike._id);
     } else {
+        const likedBy = await User.findById({ _id: user.id })
         await Like.create({
             post: postId,
             user: user.id,
         });
+        await Notification.create({
+            receiver: post.author,
+            title: `${likedBy?.name} liked your post`,
+            seen: false,
+            path: `/forum/${postId}`,
+            refId: postId,
+            type: "like"
+        })
     }
 
     const updatedPost = await Community.findByIdAndUpdate(

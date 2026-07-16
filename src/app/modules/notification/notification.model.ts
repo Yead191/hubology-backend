@@ -35,6 +35,9 @@ const notificationSchema = new Schema<INotification, INotificationModel>(
             type: Boolean,
             default: false,
         },
+        type: {
+            type: String,
+        }
     },
     { timestamps: true }
 );

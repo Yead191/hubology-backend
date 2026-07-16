@@ -9,6 +9,7 @@ export interface INotification {
   path: string;
   deleteReferenceId?: Types.ObjectId;
   seen?: boolean;
+  type?: string
 }
 
 export type INotificationModel = Model<INotification>;

@@ -8,6 +8,7 @@ import { ServicesRoutes } from '../app/modules/services/services.route';
 import { CommunityRoutes } from '../app/modules/community/community.route';
 import { LikeRoutes } from '../app/modules/like/like.route';
 import { CommentRoutes } from '../app/modules/comment/comment.route';
+import { MembershipRoutes } from '../app/modules/membership/membership.route';
 const router = express.Router();
 
 const apiRoutes = [
@@ -46,6 +47,10 @@ const apiRoutes = [
   {
     path: "/comment",
     route: CommentRoutes
+  },
+  {
+    path: "/membership",
+    route: MembershipRoutes
   }
 ];
 
