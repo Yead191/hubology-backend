@@ -33,7 +33,7 @@ const fileUploadHandler = (customFile: FileUpload[] = []) => {
     },
     {
       name: 'doc',
-      type: ['application/pdf'],
+      type: ['application/pdf',],
       maxCount: 3,
     },
   ];

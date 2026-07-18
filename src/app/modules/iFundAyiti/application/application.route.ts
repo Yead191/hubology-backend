@@ -1,0 +1,34 @@
+import express from 'express';
+import { ApplicationController } from './application.controller';
+import fileUploadHandler from '../../../middlewares/fileUploadHandler';
+import validateRequest from '../../../middlewares/validateRequest';
+import { applicationValidation } from './application.validation';
+import auth from '../../../middlewares/auth';
+import { USER_ROLES } from '../../../../enums/user';
+
+const router = express.Router();
+
+router.route('/').post(
+    fileUploadHandler([{
+        name: 'nid_card',
+        type: ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'application/pdf'],
+        maxCount: 1
+    }, {
+        name: 'proof_of_address',
+        type: ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'application/pdf'],
+        maxCount: 1
+    }, {
+        name: 'business_plan',
+        type: ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'application/pdf'],
+        maxCount: 1
+    }]),
+    validateRequest(applicationValidation.createApplicationZodSchema),
+    ApplicationController.createApplication
+).get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.getAllApplications)
+
+router.route('/track').get(ApplicationController.trackApplication)
+
+router.route("/:id").get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.getSingleApplication)
+
+
+export const ApplicationRoutes = router;

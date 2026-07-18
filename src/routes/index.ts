@@ -10,6 +10,7 @@ import { LikeRoutes } from '../app/modules/like/like.route';
 import { CommentRoutes } from '../app/modules/comment/comment.route';
 import { MembershipRoutes } from '../app/modules/membership/membership.route';
 import { ApplicationperiodRoutes } from '../app/modules/iFundAyiti/applicationperiod/applicationperiod.route';
+import { ApplicationRoutes } from '../app/modules/iFundAyiti/application/application.route';
 const router = express.Router();
 
 const apiRoutes = [
@@ -56,6 +57,10 @@ const apiRoutes = [
   {
     path: "/period",
     route: ApplicationperiodRoutes
+  },
+  {
+    path: "/application",
+    route: ApplicationRoutes
   }
 ];
 
