@@ -1,7 +1,12 @@
 import { Model } from 'mongoose';
 
 export type ISubscription = {
-  // Define the interface for Subscription here
+  name: string
+  packageId: string
+  subcriptionId: String
+  startDate: string
+  endDate: string
+  price: number
 };
 
 export type SubscriptionModel = Model<ISubscription>;

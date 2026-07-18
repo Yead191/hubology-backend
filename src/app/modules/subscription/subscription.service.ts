@@ -1,3 +1,7 @@
 import { SubscriptionModel } from './subscription.interface';
 
-export const SubscriptionServices = { };
+const getSubscriptionFromDB = async () => {
+
+}
+
+export const SubscriptionServices = {};

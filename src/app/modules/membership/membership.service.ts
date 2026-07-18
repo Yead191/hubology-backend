@@ -128,5 +128,4 @@ const deleteMembershipToDB = async (id: string) => {
     return result
 }
 
-
 export const MembershipServices = { createMembershipToDB, getAllMembershipFromDB, getMembershipByIdFromDB, updateMembershipToDB, deleteMembershipToDB };
