@@ -39,7 +39,7 @@ router.route('/recent').get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), Appl
 router.route('/winner-selection/:id').patch(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.winnerSelection)
 
 router.route("/:id").get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.getSingleApplication)
-    .patch(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), validateRequest(applicationValidation.updateApplicationStatusSchema), ApplicationController.updateApplicationStatus)
+    .patch(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), validateRequest(applicationValidation.updateApplicationStatusSchema), ApplicationController.updateApplicationStatus).delete(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.deleteApplication)
 
 
 export const ApplicationRoutes = router;

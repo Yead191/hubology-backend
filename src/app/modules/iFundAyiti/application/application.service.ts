@@ -112,7 +112,7 @@ const trackApplicationFromDB = async (email: string, dob: string) => {
     return application
 }
 
-// UPDATA APPLICATION STATUS
+// UPDATE APPLICATION STATUS
 const updateApplicationStatusToDB = async (id: string, payload: { status: TApplicationStatus, rejectionReason?: string, }, admin: JwtPayload) => {
     const application = await Application.findById(id)
     if (!application) {
@@ -217,6 +217,26 @@ const winnerSelection = async (id: string, payload: { successStory: string, fund
     return application
 
 
+}
+
+// delete Application
+const deleteApplicationFromDB = async (id: string) => {
+    const application = await Application.findById(id)
+    if (!application) {
+        throw new ApiError(StatusCodes.NOT_FOUND, "Application not found");
+    }
+
+    const docs = application.documents || []
+    for (const doc of docs) {
+        if (doc.url) {
+            unlinkFile(doc.url)
+        }
+    }
+    if (application.personal.image) {
+        unlinkFile(application.personal.image)
+    }
+    const result = await Application.deleteOne({ _id: id })
+    return result
 }
 
 
@@ -381,5 +401,6 @@ export const ApplicationServices = {
     trackApplicationFromDB,
     updateApplicationStatusToDB,
     getRecentApplicationsFromDB,
-    winnerSelection
+    winnerSelection,
+    deleteApplicationFromDB
 };

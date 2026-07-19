@@ -150,4 +150,14 @@ const winnerSelection = catchAsync(async (req: Request, res: Response) => {
     })
 })
 
-export const ApplicationController = { createApplication, getAllApplications, getSingleApplication, trackApplication, updateApplicationStatus, getStatistics, getMonthlyChart, getRequestedGrantAmountChart, getApplicationStatusStats, getRecentApplications, winnerSelection };
+const deleteApplication = catchAsync(async (req: Request, res: Response) => {
+    const result = await ApplicationServices.deleteApplicationFromDB(req.params.id)
+    return sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: "Application deleted successfully",
+        data: result
+    })
+})
+
+export const ApplicationController = { createApplication, getAllApplications, getSingleApplication, trackApplication, updateApplicationStatus, getStatistics, getMonthlyChart, getRequestedGrantAmountChart, getApplicationStatusStats, getRecentApplications, winnerSelection, deleteApplication };
