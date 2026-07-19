@@ -1,13 +1,14 @@
 import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../../errors/ApiError';
 import { Applicationperiod } from '../applicationperiod/applicationperiod.model';
-import { ApplicationModel, IApplication } from './application.interface';
+import { ApplicationModel, IApplication, TApplicationStatus } from './application.interface';
 import { Application } from './application.model';
 import unlinkFile from '../../../../shared/unlinkFile';
 import { JwtPayload } from 'jsonwebtoken';
 import { USER_ROLES } from '../../../../enums/user';
 import QueryBuilder from '../../../builder/QueryBuilder';
 import mongoose from 'mongoose';
+import { APPLICATION_STATUS, STATUS_TRANSITIONS } from './application.constants';
 
 const createApplicationToDB = async (payload: IApplication) => {
 
@@ -96,9 +97,39 @@ const trackApplicationFromDB = async (email: string, dob: string) => {
     return application
 }
 
+// UPDATA APPLICATION STATUS
+const updateApplicationStatusToDB = async (id: string, payload: { status: TApplicationStatus, rejectionReason?: string }, admin: JwtPayload) => {
+    const application = await Application.findById(id)
+    if (!application) {
+        throw new ApiError(StatusCodes.NOT_FOUND, "Application not found");
+    }
+    const allowed = STATUS_TRANSITIONS[application.status] as readonly TApplicationStatus[];
+
+    if (!allowed.includes(payload.status)) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, `Cannot change status from ${application.status} to ${payload.status}`);
+    }
+
+    application.status = payload.status
+    application.reviewedBy = admin.id
+    application.reviewedAt = new Date()
+
+
+
+    if (payload.status === APPLICATION_STATUS.REJECTED) {
+        if (!payload.rejectionReason || payload.rejectionReason.trim() === "") {
+            throw new ApiError(StatusCodes.BAD_REQUEST, "Rejection reason is required");
+        }
+        application.rejectionReason = payload.rejectionReason
+    }
+
+    await application.save()
+    return application
+}
+
 export const ApplicationServices = {
     createApplicationToDB,
     getAllApplicationsFromDB,
     getSingleApplicationFromDB,
-    trackApplicationFromDB
+    trackApplicationFromDB,
+    updateApplicationStatusToDB
 };

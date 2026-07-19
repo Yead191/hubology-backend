@@ -1,12 +1,12 @@
 import { Model, Types } from 'mongoose';
 export type TApplicationStatus =
-  | 'Submitted'
-  | 'UnderReview'
-  | 'Approved'
-  | 'Rejected'
-  | 'Finalist'
-  | 'Winner'
-  | 'Archived';
+  | 'submitted'
+  | 'underReview'
+  | 'approved'
+  | 'rejected'
+  | 'finalist'
+  | 'winner'
+  | 'archived';
 
 export interface IPersonalInformation {
   name: string;

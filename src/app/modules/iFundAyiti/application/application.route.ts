@@ -29,6 +29,7 @@ router.route('/').post(
 router.route('/track').get(ApplicationController.trackApplication)
 
 router.route("/:id").get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.getSingleApplication)
+    .patch(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), validateRequest(applicationValidation.updateApplicationStatusSchema), ApplicationController.updateApplicationStatus)
 
 
 export const ApplicationRoutes = router;

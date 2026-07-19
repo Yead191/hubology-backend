@@ -161,15 +161,15 @@ const applicationSchema = new Schema<IApplication, ApplicationModel>({
   status: {
     type: String,
     enum: [
-      'Submitted',
-      'UnderReview',
-      'Approved',
-      'Rejected',
-      'Finalist',
-      'Winner',
-      'Archived',
+      'submitted',
+      'underReview',
+      'approved',
+      'rejected',
+      'finalist',
+      'winner',
+      'archived',
     ],
-    default: 'Submitted',
+    default: 'submitted',
     index: true,
   },
 

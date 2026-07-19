@@ -1,4 +1,5 @@
-import { z } from 'zod';
+import { string, z } from 'zod';
+import { APPLICATION_STATUS } from './application.constants';
 
 const personalSchema = z.object({
     name: z
@@ -173,8 +174,18 @@ const trackApplicationZodSchema = z.object({
     }),
 });
 
+const updateApplicationStatusSchema = z.object({
+    body: z.object({
+        status: z.string().trim(),
+        rejectionReason: z.string().trim().optional(),
+    })
+});
+
+
+
 export const applicationValidation = {
     createApplicationZodSchema,
     updateApplicationZodSchema,
     trackApplicationZodSchema,
+    updateApplicationStatusSchema,
 };

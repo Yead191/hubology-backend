@@ -1,1 +1,40 @@
-export const APPLICATION_CONSTANT = 'someValue';
+export const APPLICATION_STATUS = {
+    SUBMITTED: 'submitted',
+    UNDER_REVIEW: 'underReview',
+    APPROVED: 'approved',
+    REJECTED: 'rejected',
+    FINALIST: 'finalist',
+    WINNER: 'winner',
+    ARCHIVED: 'archived',
+} as const;
+
+
+export const STATUS_TRANSITIONS = {
+    [APPLICATION_STATUS.SUBMITTED]: [
+        APPLICATION_STATUS.UNDER_REVIEW,
+    ],
+
+    [APPLICATION_STATUS.UNDER_REVIEW]: [
+        APPLICATION_STATUS.APPROVED,
+        APPLICATION_STATUS.REJECTED,
+    ],
+
+    [APPLICATION_STATUS.APPROVED]: [
+        APPLICATION_STATUS.FINALIST,
+    ],
+
+    [APPLICATION_STATUS.FINALIST]: [
+        APPLICATION_STATUS.WINNER,
+    ],
+
+    [APPLICATION_STATUS.WINNER]: [
+        APPLICATION_STATUS.ARCHIVED,
+    ],
+
+    [APPLICATION_STATUS.REJECTED]: [
+        APPLICATION_STATUS.ARCHIVED,
+    ],
+
+    [APPLICATION_STATUS.ARCHIVED]: [],
+} as const;
+

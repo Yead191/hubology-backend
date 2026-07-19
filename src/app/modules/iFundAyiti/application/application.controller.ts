@@ -75,4 +75,14 @@ const trackApplication = catchAsync(async (req: Request, res: Response) => {
     })
 })
 
-export const ApplicationController = { createApplication, getAllApplications, getSingleApplication, trackApplication };
+const updateApplicationStatus = catchAsync(async (req: Request, res: Response) => {
+    const result = await ApplicationServices.updateApplicationStatusToDB(req.params.id, req.body, req.user)
+    return sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: "Application status updated successfully",
+        data: result
+    })
+})
+
+export const ApplicationController = { createApplication, getAllApplications, getSingleApplication, trackApplication, updateApplicationStatus };
