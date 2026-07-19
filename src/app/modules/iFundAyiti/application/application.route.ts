@@ -36,6 +36,7 @@ router.route('/monthly-chart').get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN
 router.route('/requested-amount').get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.getRequestedGrantAmountChart)
 router.route('/status-chart').get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.getApplicationStatusStats)
 router.route('/recent').get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.getRecentApplications)
+router.route('/winner-selection/:id').patch(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.winnerSelection)
 
 router.route("/:id").get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.getSingleApplication)
     .patch(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), validateRequest(applicationValidation.updateApplicationStatusSchema), ApplicationController.updateApplicationStatus)

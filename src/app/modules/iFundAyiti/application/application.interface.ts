@@ -63,6 +63,8 @@ export type IApplication = {
   reviewedAt?: Date;
 
   rejectionReason?: string;
+  successStory?: string
+  fundedAmount?: number
 };
 
 export type ApplicationModel = Model<IApplication>;

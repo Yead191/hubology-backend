@@ -191,6 +191,16 @@ const applicationSchema = new Schema<IApplication, ApplicationModel>({
     type: String,
     trim: true,
   },
+  successStory: {
+    type: String,
+    trim: true,
+    required: false
+  },
+  fundedAmount: {
+    type: Number,
+    required: false,
+    default: 0,
+  },
 },
   {
     timestamps: true,

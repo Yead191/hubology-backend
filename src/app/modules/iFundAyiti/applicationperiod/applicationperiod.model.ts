@@ -33,7 +33,7 @@ const applicationperiodSchema = new Schema<IApplicationperiod, Applicationperiod
       'Open',
       'Review',
       'WinnerSelection',
-      'Completed',
+      'Closed',
     ],
     default: 'Upcoming',
   },

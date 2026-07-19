@@ -21,6 +21,16 @@ const createApplicationToDB = async (payload: IApplication) => {
             "No application period is currently open."
         );
     }
+
+    if (new Date() > currentPeriod.endDate) {
+        currentPeriod.status = "Review"
+        await currentPeriod.save();
+        throw new ApiError(
+            StatusCodes.BAD_REQUEST,
+            "Application period has ended."
+        );
+    }
+
     const existingApplication = await Application.findOne({
         'contact.email': payload.contact.email,
         'personal.dob': payload.personal.dob,
@@ -75,7 +85,7 @@ const getSingleApplicationFromDB = async (id: string) => {
     if (!mongoose.Types.ObjectId.isValid(id)) {
         throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid application id");
     }
-    const application = await Application.findById(id).populate("applicationPeriod", "title startDate endDate")
+    const application = await Application.findById(id).populate("applicationPeriod", "title startDate endDate").populate("reviewedBy", "name email role")
     if (!application) {
         throw new ApiError(StatusCodes.NOT_FOUND, "Application not found");
     }
@@ -103,7 +113,7 @@ const trackApplicationFromDB = async (email: string, dob: string) => {
 }
 
 // UPDATA APPLICATION STATUS
-const updateApplicationStatusToDB = async (id: string, payload: { status: TApplicationStatus, rejectionReason?: string }, admin: JwtPayload) => {
+const updateApplicationStatusToDB = async (id: string, payload: { status: TApplicationStatus, rejectionReason?: string, }, admin: JwtPayload) => {
     const application = await Application.findById(id)
     if (!application) {
         throw new ApiError(StatusCodes.NOT_FOUND, "Application not found");
@@ -126,6 +136,14 @@ const updateApplicationStatusToDB = async (id: string, payload: { status: TAppli
         }
         application.rejectionReason = payload.rejectionReason
     }
+    if (payload.status === APPLICATION_STATUS.FINALIST) {
+        // close application period
+        await Applicationperiod.updateOne({ _id: application.applicationPeriod }, { $set: { status: "WinnerSelection" } })
+    }
+    if (payload.status === APPLICATION_STATUS.WINNER) {
+        // close application period
+        throw new ApiError(StatusCodes.BAD_REQUEST, "Winner selection will be done through winner selection process");
+    }
 
     await application.save()
 
@@ -144,6 +162,61 @@ const updateApplicationStatusToDB = async (id: string, payload: { status: TAppli
     }
 
     return application
+}
+
+
+// winner selection
+const winnerSelection = async (id: string, payload: { successStory: string, fundedAmount: number }, admin: JwtPayload) => {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid application id");
+    }
+    const application = await Application.findById(id)
+    if (!application) {
+        throw new ApiError(StatusCodes.NOT_FOUND, "Application not found");
+    }
+    //check if application is eligible for winner selection
+    const allowed = STATUS_TRANSITIONS[application.status] as readonly TApplicationStatus[];
+    if (!allowed.includes("winner")) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, `Cannot change status from ${application.status} to "winner"`);
+    }
+    const isWinnerExist = await Application.findOne({ status: "winner", applicationPeriod: application.applicationPeriod })
+    if (isWinnerExist) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, "Winner already exists");
+    }
+    //check if fundedAmount is valid
+    if (!payload.fundedAmount || payload.fundedAmount <= 0) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, "Funded amount is required");
+    }
+    //check if successStory is valid
+    if (!payload.successStory || payload.successStory.trim() === "") {
+        throw new ApiError(StatusCodes.BAD_REQUEST, "Success story is required");
+    }
+    //update application status to winner
+    application.status = "winner"
+    application.fundedAmount = payload.fundedAmount
+    application.successStory = payload.successStory
+    application.reviewedBy = admin.id
+    application.reviewedAt = new Date()
+    await application.save()
+
+    //close application period
+    await Applicationperiod.updateOne({ _id: application.applicationPeriod }, { $set: { status: "Closed" } })
+    //send email notification to winner
+    try {
+        const emailData = emailTemplate.applicationStatusUpdate({
+            email: application.contact.email,
+            name: application.personal.name,
+            projectName: application.grant.projectName,
+            status: application.status,
+            rejectionReason: application.rejectionReason,
+        });
+        emailHelper.sendEmail(emailData);
+    } catch (error) {
+        console.error("Failed to send status update email:", error);
+    }
+    return application
+
+
 }
 
 
@@ -307,5 +380,6 @@ export const ApplicationServices = {
     getSingleApplicationFromDB,
     trackApplicationFromDB,
     updateApplicationStatusToDB,
-    getRecentApplicationsFromDB
+    getRecentApplicationsFromDB,
+    winnerSelection
 };

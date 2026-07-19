@@ -140,5 +140,14 @@ const getRecentApplications = catchAsync(async (req: Request, res: Response) => 
     })
 })
 
+const winnerSelection = catchAsync(async (req: Request, res: Response) => {
+    const result = await ApplicationServices.winnerSelection(req.params.id, req.body, req.user)
+    return sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: "Winner selection updated successfully",
+        data: result
+    })
+})
 
-export const ApplicationController = { createApplication, getAllApplications, getSingleApplication, trackApplication, updateApplicationStatus, getStatistics, getMonthlyChart, getRequestedGrantAmountChart, getApplicationStatusStats, getRecentApplications };
+export const ApplicationController = { createApplication, getAllApplications, getSingleApplication, trackApplication, updateApplicationStatus, getStatistics, getMonthlyChart, getRequestedGrantAmountChart, getApplicationStatusStats, getRecentApplications, winnerSelection };

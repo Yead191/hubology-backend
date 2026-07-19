@@ -5,7 +5,7 @@ export type TApplicationPeriodStatus =
   | 'Open'
   | 'Review'
   | 'WinnerSelection'
-  | 'Completed';
+  | 'Closed';
 
 export type IApplicationperiod = {
   title: string;
