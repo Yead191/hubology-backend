@@ -3,6 +3,7 @@ import path from 'path';
 dotenv.config({ path: path.join(process.cwd(), '.env') });
 
 export default {
+  project_name: process.env.PROJECT_NAME,
   ip_address: process.env.IP_ADDRESS,
   database_url: process.env.DATABASE_URL,
   backup_database_url: process.env.BACKUP_DATABASE_URL,
@@ -29,11 +30,11 @@ export default {
     webhook_secret: process.env.WEBHOOK_SECRET,
   },
 
-  redis:{
+  redis: {
     host: process.env.REDIS_HOST,
     port: process.env.REDIS_PORT
   },
-  kafka:{
+  kafka: {
     url: process.env.KAFKA_URL
   },
   elasticSearch: {

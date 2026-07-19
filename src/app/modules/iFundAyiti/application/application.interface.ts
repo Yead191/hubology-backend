@@ -13,6 +13,7 @@ export interface IPersonalInformation {
   dob: Date;
   nationality: string;
   location: string;
+  image: string
 }
 
 export interface IContactInformation {

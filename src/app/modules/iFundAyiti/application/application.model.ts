@@ -20,6 +20,11 @@ const PersonalSchema = new Schema(
       type: String,
       required: true,
     },
+    image: {
+      type: String,
+      required: true,
+      default: 'https://i.ibb.co/z5YHLV9/profile.png',
+    }
   },
   {
     _id: false,

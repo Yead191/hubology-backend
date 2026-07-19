@@ -48,6 +48,7 @@ app.use(express.urlencoded({ extended: true }));
 
 //file retrieve
 app.use("/files/:folder/:file", fileStreamHandler);
+app.use(express.static('public'));
 // app.use(express.static('uploads'));
 //router
 app.post('/api/v1/upload/chunk', handleChunkUpload);

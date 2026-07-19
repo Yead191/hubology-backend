@@ -16,6 +16,8 @@ const createApplication = catchAsync(async (req: Request, res: Response) => {
     const nid_card = getSingleFilePath(req.files, 'nid_card');
     const proof_of_address = getSingleFilePath(req.files, 'proof_of_address');
     const business_plan = getSingleFilePath(req.files, 'business_plan');
+    const image = getSingleFilePath(req.files, 'image');
+    data.personal.image = image;
 
 
     const documentTypes = [{
@@ -85,4 +87,58 @@ const updateApplicationStatus = catchAsync(async (req: Request, res: Response) =
     })
 })
 
-export const ApplicationController = { createApplication, getAllApplications, getSingleApplication, trackApplication, updateApplicationStatus };
+// dashboard
+const getStatistics = catchAsync(async (req: Request, res: Response) => {
+    const result = await ApplicationServices.getStatisticsFromDB()
+    return sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: "Statistics fetched successfully",
+        data: result
+    })
+})
+
+const getMonthlyChart = catchAsync(async (req: Request, res: Response) => {
+    const year = req.query.year as string;
+    const result = await ApplicationServices.getMonthlyApplicationChartFromDB(year)
+    return sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: "Monthly application chart fetched successfully",
+        data: result
+    })
+})
+
+const getRequestedGrantAmountChart = catchAsync(async (req: Request, res: Response) => {
+    const year = req.query.year as string;
+    const result = await ApplicationServices.getRequestedGrantAmountChartFromDB(year)
+    return sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: "Requested grant amount chart fetched successfully",
+        data: result
+    })
+})
+
+const getApplicationStatusStats = catchAsync(async (req: Request, res: Response) => {
+    const result = await ApplicationServices.getApplicationStatusStatsFromDB()
+    return sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: "Application status statistics fetched successfully",
+        data: result
+    })
+})
+
+const getRecentApplications = catchAsync(async (req: Request, res: Response) => {
+    const result = await ApplicationServices.getRecentApplicationsFromDB()
+    return sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: "Recent applications fetched successfully",
+        data: result
+    })
+})
+
+
+export const ApplicationController = { createApplication, getAllApplications, getSingleApplication, trackApplication, updateApplicationStatus, getStatistics, getMonthlyChart, getRequestedGrantAmountChart, getApplicationStatusStats, getRecentApplications };

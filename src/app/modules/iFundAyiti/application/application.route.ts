@@ -10,6 +10,10 @@ const router = express.Router();
 
 router.route('/').post(
     fileUploadHandler([{
+        name: 'image',
+        type: ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'],
+        maxCount: 1
+    }, {
         name: 'nid_card',
         type: ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'application/pdf'],
         maxCount: 1
@@ -27,6 +31,11 @@ router.route('/').post(
 ).get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.getAllApplications)
 
 router.route('/track').get(ApplicationController.trackApplication)
+router.route('/statistics').get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.getStatistics)
+router.route('/monthly-chart').get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.getMonthlyChart)
+router.route('/requested-amount').get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.getRequestedGrantAmountChart)
+router.route('/status-chart').get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.getApplicationStatusStats)
+router.route('/recent').get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.getRecentApplications)
 
 router.route("/:id").get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.getSingleApplication)
     .patch(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), validateRequest(applicationValidation.updateApplicationStatusSchema), ApplicationController.updateApplicationStatus)
