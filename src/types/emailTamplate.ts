@@ -17,3 +17,20 @@ export type IApplicationStatusUpdate = {
   rejectionReason?: string;
 };
 
+export type IDonationReceipt = {
+  donorEmail: string;
+  donorName: string;
+  amount: number;
+  transactionId?: string;
+};
+
+export type IDonationReceived = {
+  adminEmail: string;
+  adminName: string;
+  donorName: string;
+  donorEmail: string;
+  amount: number;
+  transactionId?: string;
+};
+
+

@@ -215,7 +215,7 @@ const winnerSelection = async (id: string, payload: { successStory: string, fund
     // Track transaction in ProgramFun
 
     const trackFund = await Donation.create({
-        name: admin.name,
+        name: admin.name || "Admin",
         email: admin.email,
         type: 'grant',
         amount: payload.fundedAmount,

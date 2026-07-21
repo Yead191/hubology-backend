@@ -5,7 +5,7 @@ const applicationPeriodStatus = z.enum([
     'Open',
     'Review',
     'WinnerSelection',
-    'Completed',
+    'Closed',
 ]);
 
 const createApplicationPeriodZodSchema = z.object({

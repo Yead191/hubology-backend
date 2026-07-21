@@ -5,7 +5,7 @@ import { StatusCodes } from 'http-status-codes';
 import { DonationServices } from './donation.service';
 
 const createDonation = catchAsync(async (req: Request, res: Response) => {
-  const hostUrl = `${req.protocol}://${req.get('host')}/api/v1`;
+  const hostUrl = `http://10.10.26.173:5003/api/v1`;
   const result = await DonationServices.createDonationToDB(req.body, hostUrl);
   return sendResponse(res, {
     success: true,
@@ -27,9 +27,8 @@ const getAllDonations = catchAsync(async (req: Request, res: Response) => {
 });
 
 const handleWebhook = async (req: Request, res: Response) => {
-
-  const status = req.params.status;
-
+  console.log(req.query)
+  const status = req.query.status as string;
 
   try {
     const event = DonationServices.updateStatusToDB(status, res);

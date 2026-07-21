@@ -39,7 +39,7 @@ const createDonationToDB = async (payload: IDonation, hostUrl: string) => {
 const getAllDonationsFromDB = async (query: Record<string, any>) => {
   const qb = new QueryBuilder(Donation.find().populate({
     path: "applicant",
-    select: "name email image applicationPeriod",
+    select: "personal applicationPeriod",
     populate: {
       path: "applicationPeriod",
       select: "title startDate endDate"
@@ -59,11 +59,11 @@ const updateStatusToDB = async (status: string, res: any) => {
 
   if (status === "success") {
 
-    res.redirect(`https://hubology-client-7827b.web.app/payment-success`);
+    res.redirect(`https://hubology-frontend.vercel.app/ifundayiti/payment-success`);
   }
 
   else if (status === "failed") {
-    res.redirect(`https://hubology-client-7827b.web.app/payment-cancel`);
+    res.redirect(`https://hubology-frontend.vercel.app/ifundayiti/payment-cancel`);
   }
 }
 
