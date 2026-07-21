@@ -11,6 +11,8 @@ import { CommentRoutes } from '../app/modules/comment/comment.route';
 import { MembershipRoutes } from '../app/modules/membership/membership.route';
 import { ApplicationperiodRoutes } from '../app/modules/iFundAyiti/applicationperiod/applicationperiod.route';
 import { ApplicationRoutes } from '../app/modules/iFundAyiti/application/application.route';
+import { DonationRoutes } from '../app/modules/iFundAyiti/donation/donation.route';
+import { ProgramFundRoutes } from '../app/modules/iFundAyiti/programFund/programFund.route';
 const router = express.Router();
 
 const apiRoutes = [
@@ -61,6 +63,14 @@ const apiRoutes = [
   {
     path: "/application",
     route: ApplicationRoutes
+  },
+  {
+    path: "/donation",
+    route: DonationRoutes
+  },
+  {
+    path: "/program-fund",
+    route: ProgramFundRoutes
   }
 ];
 

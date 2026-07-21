@@ -10,6 +10,9 @@ import mongoose from 'mongoose';
 import { APPLICATION_STATUS, STATUS_TRANSITIONS } from './application.constants';
 import { emailHelper } from '../../../../helpers/emailHelper';
 import { emailTemplate } from '../../../../shared/emailTemplate';
+import { ProgramFund } from '../programFund/programFund.model';
+import { Donation } from '../donation/donation.model';
+import { NotificationServices } from '../../notification/notification.service';
 
 
 const createApplicationToDB = async (payload: IApplication) => {
@@ -174,6 +177,15 @@ const winnerSelection = async (id: string, payload: { successStory: string, fund
     if (!application) {
         throw new ApiError(StatusCodes.NOT_FOUND, "Application not found");
     }
+    // check fund amount
+    const totalFundAmount = await ProgramFund.findOne({})
+    if (!totalFundAmount || totalFundAmount.amount <= 0) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, "No fund available");
+    }
+    if (payload.fundedAmount > totalFundAmount.amount) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, "Total fund is not enough for this application");
+    }
+
     //check if application is eligible for winner selection
     const allowed = STATUS_TRANSITIONS[application.status] as readonly TApplicationStatus[];
     if (!allowed.includes("winner")) {
@@ -197,7 +209,28 @@ const winnerSelection = async (id: string, payload: { successStory: string, fund
     application.successStory = payload.successStory
     application.reviewedBy = admin.id
     application.reviewedAt = new Date()
+
+
+
+    // Track transaction in ProgramFun
+
+    const trackFund = await Donation.create({
+        name: admin.name,
+        email: admin.email,
+        type: 'grant',
+        amount: payload.fundedAmount,
+        applicant: application._id,
+    });
+
+    if (!trackFund) {
+        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to track fund");
+    }
+    await ProgramFund.updateOne({}, {
+        $inc: { amount: - payload.fundedAmount },
+    })
     await application.save()
+
+
 
     //close application period
     await Applicationperiod.updateOne({ _id: application.applicationPeriod }, { $set: { status: "Closed" } })
@@ -211,6 +244,12 @@ const winnerSelection = async (id: string, payload: { successStory: string, fund
             rejectionReason: application.rejectionReason,
         });
         emailHelper.sendEmail(emailData);
+        NotificationServices.sendNotificationToAdmins({
+            title: "Winner Selected",
+            message: `${admin.name} selected ${application.personal.name} as winner`,
+            refId: application._id,
+            path: "/transactions"
+        })
     } catch (error) {
         console.error("Failed to send status update email:", error);
     }

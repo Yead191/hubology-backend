@@ -1,3 +1,4 @@
+import { ProgramFund } from '../app/modules/iFundAyiti/programFund/programFund.model';
 import { User } from '../app/modules/user/user.model';
 import config from '../config';
 import { USER_ROLES } from '../enums/user';
@@ -19,5 +20,15 @@ export const seedSuperAdmin = async () => {
   if (!isExistSuperAdmin) {
     await User.create(payload);
     logger.info('✨ Super Admin account has been successfully created!');
+  }
+
+  const existFundProgram = await ProgramFund.findOne()
+
+  if (!existFundProgram) {
+    await ProgramFund.create({
+      type: 'Donation',
+      amount: 0,
+      title: 'Donation inital'
+    })
   }
 };
