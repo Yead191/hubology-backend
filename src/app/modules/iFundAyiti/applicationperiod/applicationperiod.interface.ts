@@ -17,6 +17,7 @@ export type IApplicationperiod = {
   maximumGrantAmount: number;
 
   status: TApplicationPeriodStatus;
+  totalApplicationsSubmitted?: number
 };
 
 export type ApplicationperiodModel = Model<IApplicationperiod>;

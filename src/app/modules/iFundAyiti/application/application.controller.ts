@@ -109,13 +109,13 @@ const getMonthlyChart = catchAsync(async (req: Request, res: Response) => {
     })
 })
 
-const getRequestedGrantAmountChart = catchAsync(async (req: Request, res: Response) => {
+const getDonationAmountChart = catchAsync(async (req: Request, res: Response) => {
     const year = req.query.year as string;
-    const result = await ApplicationServices.getRequestedGrantAmountChartFromDB(year)
+    const result = await ApplicationServices.getDonationAmountChartFromDB(year)
     return sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,
-        message: "Requested grant amount chart fetched successfully",
+        message: "Donation amount chart fetched successfully",
         data: result
     })
 })
@@ -160,4 +160,4 @@ const deleteApplication = catchAsync(async (req: Request, res: Response) => {
     })
 })
 
-export const ApplicationController = { createApplication, getAllApplications, getSingleApplication, trackApplication, updateApplicationStatus, getStatistics, getMonthlyChart, getRequestedGrantAmountChart, getApplicationStatusStats, getRecentApplications, winnerSelection, deleteApplication };
+export const ApplicationController = { createApplication, getAllApplications, getSingleApplication, trackApplication, updateApplicationStatus, getStatistics, getMonthlyChart, getDonationAmountChart, getApplicationStatusStats, getRecentApplications, winnerSelection, deleteApplication };

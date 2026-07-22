@@ -8,6 +8,7 @@ export type ICommunity = {
   image?: string
   totalLikes: number;
   totalComments: number;
+  reportCount: number;
   status?: string
 };
 

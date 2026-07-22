@@ -13,6 +13,8 @@ import { ApplicationperiodRoutes } from '../app/modules/iFundAyiti/applicationpe
 import { ApplicationRoutes } from '../app/modules/iFundAyiti/application/application.route';
 import { DonationRoutes } from '../app/modules/iFundAyiti/donation/donation.route';
 import { ProgramFundRoutes } from '../app/modules/iFundAyiti/programFund/programFund.route';
+import { DashboardOverviewRoutes } from '../app/modules/dashboard-overview/dashboard-overview.route';
+import { ReportRoutes } from '../app/modules/report/report.route';
 const router = express.Router();
 
 const apiRoutes = [
@@ -71,7 +73,15 @@ const apiRoutes = [
   {
     path: "/program-fund",
     route: ProgramFundRoutes
-  }
+  },
+  {
+    path: "/dashboard",
+    route: DashboardOverviewRoutes
+  },
+  {
+    path: "/report",
+    route: ReportRoutes
+  },
 ];
 
 apiRoutes.forEach(route => router.use(route.path, route.route));

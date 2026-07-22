@@ -83,4 +83,15 @@ const getMyPosts = catchAsync(async (req: Request, res: Response) => {
     })
 })
 
-export const CommunityController = { createPost, getAllPosts, updatePost, deletePost, getSignglePost, getMyPosts };
+const reviewPost = catchAsync(async (req: Request, res: Response) => {
+
+    const result = await CommunityServices.reviewPostFromDB(req.params.id, req.body)
+    return sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        success: true,
+        message: "Post reviewed successfully",
+        data: result
+    })
+})
+
+export const CommunityController = { createPost, getAllPosts, updatePost, deletePost, getSignglePost, getMyPosts, reviewPost };

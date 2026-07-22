@@ -33,7 +33,7 @@ router.route('/').post(
 router.route('/track').get(ApplicationController.trackApplication)
 router.route('/statistics').get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.getStatistics)
 router.route('/monthly-chart').get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.getMonthlyChart)
-router.route('/requested-amount').get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.getRequestedGrantAmountChart)
+router.route('/donation-amount').get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.getDonationAmountChart)
 router.route('/status-chart').get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.getApplicationStatusStats)
 router.route('/recent').get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.getRecentApplications)
 router.route('/winner-selection/:id').patch(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), ApplicationController.winnerSelection)

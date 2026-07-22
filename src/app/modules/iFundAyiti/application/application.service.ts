@@ -348,7 +348,7 @@ const getMonthlyApplicationChartFromDB = async (year?: string) => {
     return monthlyData;
 }
 
-const getRequestedGrantAmountChartFromDB = async (year?: string) => {
+const getDonationAmountChartFromDB = async (year?: string) => {
     // monthly requested grant amount chart by year
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const monthlyData = months.map(m => ({ month: m, amount: 0 }));
@@ -357,9 +357,10 @@ const getRequestedGrantAmountChartFromDB = async (year?: string) => {
     const startDate = new Date(`${yearNum}-01-01T00:00:00.000Z`);
     const endDate = new Date(`${yearNum}-12-31T23:59:59.999Z`);
 
-    const monthlyStats = await Application.aggregate([
+    const monthlyStats = await Donation.aggregate([
         {
             $match: {
+                type: "donation",
                 createdAt: {
                     $gte: startDate,
                     $lte: endDate
@@ -369,7 +370,7 @@ const getRequestedGrantAmountChartFromDB = async (year?: string) => {
         {
             $group: {
                 _id: { $month: "$createdAt" },
-                totalAmount: { $sum: "$grant.requestedAmount" }
+                totalAmount: { $sum: "$amount" }
             }
         },
         {
@@ -432,7 +433,7 @@ const getRecentApplicationsFromDB = async () => {
 export const ApplicationServices = {
     getStatisticsFromDB,
     getMonthlyApplicationChartFromDB,
-    getRequestedGrantAmountChartFromDB,
+    getDonationAmountChartFromDB,
     getApplicationStatusStatsFromDB,
     createApplicationToDB,
     getAllApplicationsFromDB,

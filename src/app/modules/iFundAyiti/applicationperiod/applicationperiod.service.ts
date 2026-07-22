@@ -3,6 +3,7 @@ import ApiError from '../../../../errors/ApiError';
 import { IApplicationperiod } from './applicationperiod.interface';
 import { Applicationperiod } from './applicationperiod.model';
 import QueryBuilder from '../../../builder/QueryBuilder';
+import { Application } from '../application/application.model';
 
 const determineStatus = (startDate: Date, endDate: Date): 'Upcoming' | 'Open' | 'Review' => {
     const today = new Date();
@@ -55,7 +56,30 @@ const getAllApplicationPeriodFromDB = async (query: Record<string, any>) => {
         qb.modelQuery.lean(),
         qb.getPaginationInfo()
     ])
-    return { periods, pagination }
+
+    const periodIds = periods.map(period => period._id);
+    const counts = await Application.aggregate([
+        {
+            $match: {
+                applicationPeriod: { $in: periodIds }
+            }
+        },
+        {
+            $group: {
+                _id: "$applicationPeriod",
+                count: { $sum: 1 }
+            }
+        }
+    ]);
+
+    const countMap = new Map(counts.map(item => [item._id.toString(), item.count]));
+
+    const periodsWithCounts = periods.map(period => ({
+        ...period,
+        totalApplicationsSubmitted: countMap.get(period._id?.toString()) || 0
+    }));
+
+    return { periods: periodsWithCounts, pagination }
 }
 
 

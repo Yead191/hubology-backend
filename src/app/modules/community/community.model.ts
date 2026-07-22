@@ -29,6 +29,10 @@ const communitySchema = new Schema<ICommunity, CommunityModel>({
     type: Number,
     default: 0
   },
+  reportCount: {
+    type: Number,
+    default: 0
+  },
   status: {
     type: String,
     enum: ["published", "reported", "removed"],

@@ -8,6 +8,7 @@ import { USER_ROLES } from '../../../enums/user';
 import QueryBuilder from '../../builder/QueryBuilder';
 import mongoose from 'mongoose';
 import { Like } from '../like/like.model';
+import { Report } from '../report/report.model';
 
 const createPostToDB = async (user: JwtPayload, payload: ICommunity) => {
     if (!user) {
@@ -118,11 +119,31 @@ const getMyPosts = async (user: JwtPayload, query: Record<string, any>) => {
 
 }
 
+const reviewPostFromDB = async (id: string, payload: {
+    status: "published" | "removed"
+}) => {
+
+    const post = await Community.findById(id)
+    if (!post) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, "Post doesn't exist!")
+    }
+    if (payload.status === "published") {
+        post.reportCount = 0
+        await Report.deleteMany({ post: id })
+    }
+    post.status = payload.status;
+    await post.save();
+
+    return post;
+
+}
+
 export const CommunityServices = {
     createPostToDB,
     getAllPostsFromDB,
     updatePostToDB,
     deletePostFromDB,
     getSinglePostFromDB,
-    getMyPosts
+    getMyPosts,
+    reviewPostFromDB
 };

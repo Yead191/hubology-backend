@@ -25,7 +25,10 @@ const applicationperiodSchema = new Schema<IApplicationperiod, Applicationperiod
     required: true,
     min: 1, max: 1000
   },
-
+  totalApplicationsSubmitted: {
+    type: Number,
+    default: 0
+  },
   status: {
     type: String,
     enum: [
@@ -37,10 +40,10 @@ const applicationperiodSchema = new Schema<IApplicationperiod, Applicationperiod
     ],
     default: 'Upcoming',
   },
-},
-  {
-    timestamps: true,
-  }
+
+}, {
+  timestamps: true,
+}
 );
 
 applicationperiodSchema.index({
