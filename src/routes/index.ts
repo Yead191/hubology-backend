@@ -16,6 +16,8 @@ import { ProgramFundRoutes } from '../app/modules/iFundAyiti/programFund/program
 import { DashboardOverviewRoutes } from '../app/modules/dashboard-overview/dashboard-overview.route';
 import { ReportRoutes } from '../app/modules/report/report.route';
 import { CartRoutes } from '../app/modules/cart/cart.route';
+import { TransactionRoutes } from '../app/modules/transaction/transaction.route';
+import { OrderRoutes } from '../app/modules/order/order.route';
 const router = express.Router();
 
 const apiRoutes = [
@@ -87,6 +89,11 @@ const apiRoutes = [
     path: '/cart',
     route: CartRoutes,
   },
+  {
+    path: '/transaction',
+    route: TransactionRoutes,
+  },
+  { path: '/order', route: OrderRoutes },
 ];
 
 apiRoutes.forEach(route => router.use(route.path, route.route));
