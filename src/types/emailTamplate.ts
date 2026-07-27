@@ -32,5 +32,41 @@ export type IDonationReceived = {
   amount: number;
   transactionId?: string;
 };
+export type IOrderItem = {
+  title: string;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+};
 
+export type IOrderConfirmation = {
+  email: string;
+  name: string;
+  orderId: string;
+  transactionId?: string;
+  items: IOrderItem[];
+  totalPrice: number;
+  formattedAddress: string;
+  contactNumber?: string;
+};
 
+export type IAdminOrderNotification = {
+  adminEmail: string;
+  adminName: string;
+  customerName: string;
+  customerEmail: string;
+  orderId: string;
+  transactionId?: string;
+  items: IOrderItem[];
+  totalPrice: number;
+  formattedAddress: string;
+};
+
+export type IOrderStatusUpdate = {
+  email: string;
+  name: string;
+  orderId: string;
+  status: string;
+  formattedAddress?: string;
+  totalPrice?: number;
+};

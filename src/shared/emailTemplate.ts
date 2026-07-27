@@ -1,5 +1,10 @@
 import { ICreateAccount, IResetPassword, IApplicationStatusUpdate, IDonationReceipt, IDonationReceived } from '../types/emailTamplate';
 import config from '../config';
+import {
+  orderConfirmation,
+  adminOrderNotification,
+  orderStatusUpdate,
+} from '../templates/orderTemplate';
 
 const getLogoUrl = () => {
   const host = config.ip_address === '0.0.0.0' ? 'localhost' : config.ip_address;
@@ -340,4 +345,7 @@ export const emailTemplate = {
   applicationStatusUpdate,
   donationReceipt,
   donationReceived,
+  orderConfirmation,
+  adminOrderNotification,
+  orderStatusUpdate,
 };

@@ -10,6 +10,10 @@ import stripe from '../../../config/stripe';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { USER_ROLES } from '../../../enums/user';
 import { ORDER_STATUS } from '../../../enums/orders';
+import { NotificationServices } from '../notification/notification.service';
+import { emailHelper } from '../../../helpers/emailHelper';
+import { emailTemplate } from '../../../shared/emailTemplate';
+import { logger } from '../../../shared/logger';
 
 const createOrderToDb = async (user: JwtPayload, payload: OrderPayload) => {
   const myCart = await Cart.find({ user: user.id })
@@ -29,6 +33,7 @@ const createOrderToDb = async (user: JwtPayload, payload: OrderPayload) => {
     unit_price: item.unit_price,
     total_price: item.total_price,
   }));
+  // console.log(items);
 
   const order = {
     user: user.id,
@@ -48,7 +53,7 @@ const createOrderToDb = async (user: JwtPayload, payload: OrderPayload) => {
           `http://${config.ip_address}:${config.port}/files/${item.product.image}`,
         ],
       },
-      unit_amount: item.total_price * 100,
+      unit_amount: item.unit_price * 100,
     },
     quantity: item.quantity,
   }));
@@ -104,6 +109,7 @@ const createOrderToDb = async (user: JwtPayload, payload: OrderPayload) => {
     mode: 'payment',
     success_url: `https://hubology-frontend.vercel.app/checkout?status=success`,
     cancel_url: `https://hubology-frontend.vercel.app/checkout?status=failed`,
+    customer_email: user.email,
     metadata: {
       userId: user.id!,
       orderId: createOrder._id.toString()!,
@@ -146,22 +152,66 @@ const getOrdersFromDB = async (
 };
 
 const changeOrderStatus = async (id: string, status: ORDER_STATUS) => {
-  const order = await Order.findById(id);
+  const order = await Order.findById(id).populate('user');
   if (!order) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Order not found');
   }
 
-  if ([ORDER_STATUS.DELIVERD, ORDER_STATUS.CANCELLED].includes(order.status))
+  if ([ORDER_STATUS.DELIVERD, ORDER_STATUS.CANCELLED].includes(order.status)) {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      'Order already' + order.status + '!',
-    );
-  if (status === ORDER_STATUS.PROCESSING) {
-    await Order.findByIdAndUpdate(
-      { _id: id },
-      { status: ORDER_STATUS.PROCESSING },
+      `Order already ${order.status}!`,
     );
   }
+
+  const updatedOrder = await Order.findByIdAndUpdate(
+    id,
+    { status: status },
+    { new: true },
+  ).populate('user');
+
+  if (!updatedOrder) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'Failed to update order status',
+    );
+  }
+
+  const customer = updatedOrder.user as any;
+
+  // 1. Send notification to user
+  if (customer?._id) {
+    try {
+      await NotificationServices.createNotification({
+        receiver: customer._id,
+        title: 'Order Status Updated',
+        message: `Your order #${updatedOrder.order_id} status has been changed to ${status}.`,
+        refId: updatedOrder._id,
+        path: '/orders',
+      });
+    } catch (notifErr) {
+      logger.error('Error sending order status notification:', notifErr);
+    }
+  }
+
+  // 2. Send email to user
+  if (customer?.email) {
+    try {
+      const emailData = emailTemplate.orderStatusUpdate({
+        email: customer.email,
+        name: customer.name || 'Customer',
+        orderId: updatedOrder.order_id,
+        status: status,
+        formattedAddress: updatedOrder.formatted_address,
+        totalPrice: updatedOrder.price_breakdown?.total_price || 0,
+      });
+      await emailHelper.sendEmail(emailData);
+    } catch (emailErr) {
+      logger.error('Error sending order status email:', emailErr);
+    }
+  }
+
+  return updatedOrder;
 };
 
 export const OrderServices = {

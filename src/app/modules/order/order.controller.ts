@@ -35,7 +35,7 @@ const changeOrderStatus = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
-    message: 'Order data retrieved successfully',
+    message: 'Order status updated successfully',
     data: result,
   });
 });
