@@ -15,6 +15,7 @@ import { DonationRoutes } from '../app/modules/iFundAyiti/donation/donation.rout
 import { ProgramFundRoutes } from '../app/modules/iFundAyiti/programFund/programFund.route';
 import { DashboardOverviewRoutes } from '../app/modules/dashboard-overview/dashboard-overview.route';
 import { ReportRoutes } from '../app/modules/report/report.route';
+import { CartRoutes } from '../app/modules/cart/cart.route';
 const router = express.Router();
 
 const apiRoutes = [
@@ -28,59 +29,63 @@ const apiRoutes = [
   },
   {
     path: '/vendor',
-    route: VendorRoutes
+    route: VendorRoutes,
   },
   {
-    path: "/books",
-    route: BookRoutes
+    path: '/books',
+    route: BookRoutes,
   },
   {
-    path: "/notification",
-    route: NotificationRoutes
+    path: '/notification',
+    route: NotificationRoutes,
   },
   {
-    path: "/services",
-    route: ServicesRoutes
+    path: '/services',
+    route: ServicesRoutes,
   },
   {
-    path: "/posts",
-    route: CommunityRoutes
+    path: '/posts',
+    route: CommunityRoutes,
   },
   {
-    path: "/like",
-    route: LikeRoutes
+    path: '/like',
+    route: LikeRoutes,
   },
   {
-    path: "/comment",
-    route: CommentRoutes
+    path: '/comment',
+    route: CommentRoutes,
   },
   {
-    path: "/membership",
-    route: MembershipRoutes
+    path: '/membership',
+    route: MembershipRoutes,
   },
   {
-    path: "/period",
-    route: ApplicationperiodRoutes
+    path: '/period',
+    route: ApplicationperiodRoutes,
   },
   {
-    path: "/application",
-    route: ApplicationRoutes
+    path: '/application',
+    route: ApplicationRoutes,
   },
   {
-    path: "/donation",
-    route: DonationRoutes
+    path: '/donation',
+    route: DonationRoutes,
   },
   {
-    path: "/program-fund",
-    route: ProgramFundRoutes
+    path: '/program-fund',
+    route: ProgramFundRoutes,
   },
   {
-    path: "/dashboard",
-    route: DashboardOverviewRoutes
+    path: '/dashboard',
+    route: DashboardOverviewRoutes,
   },
   {
-    path: "/report",
-    route: ReportRoutes
+    path: '/report',
+    route: ReportRoutes,
+  },
+  {
+    path: '/cart',
+    route: CartRoutes,
   },
 ];
 

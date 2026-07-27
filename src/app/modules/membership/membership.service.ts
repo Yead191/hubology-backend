@@ -4,7 +4,6 @@ import QueryBuilder from '../../builder/QueryBuilder';
 import { IMembership, } from './membership.interface';
 import { Membership } from './membership.model';
 import stripe from '../../../config/stripe';
-import { config } from 'dotenv';
 
 const createMembershipToDB = async (payload: IMembership) => {
 
