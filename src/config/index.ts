@@ -7,6 +7,7 @@ export default {
   ip_address: process.env.IP_ADDRESS,
   database_url: process.env.DATABASE_URL,
   backup_database_url: process.env.BACKUP_DATABASE_URL,
+  frontend_url: process.env.FRONTEND_URL,
   node_env: process.env.NODE_ENV,
   port: process.env.PORT,
   bcrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS,
@@ -32,12 +33,12 @@ export default {
 
   redis: {
     host: process.env.REDIS_HOST,
-    port: process.env.REDIS_PORT
+    port: process.env.REDIS_PORT,
   },
   kafka: {
-    url: process.env.KAFKA_URL
+    url: process.env.KAFKA_URL,
   },
   elasticSearch: {
-    url: process.env.ELASTICSEARCH_URL
-  }
+    url: process.env.ELASTICSEARCH_URL,
+  },
 };

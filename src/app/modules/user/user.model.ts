@@ -118,6 +118,11 @@ const userSchema = new Schema<IUser, UserModal>(
       required: false
     },
 
+    subscription: {
+      type: Schema.Types.ObjectId,
+      ref: 'Subscription',
+    },
+
     // mustChangePassword: {
     //   type: Boolean,
     //   default: false,

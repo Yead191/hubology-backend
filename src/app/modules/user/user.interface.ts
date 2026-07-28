@@ -1,4 +1,4 @@
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { USER_ROLES } from '../../../enums/user';
 
 export interface IVendorProfile {
@@ -24,7 +24,9 @@ export interface IUser {
   email: string;
   password: string;
   image?: string;
-  role: USER_ROLES
+  role: USER_ROLES;
+
+  subscription?: Types.ObjectId;
 
   verified: boolean;
 

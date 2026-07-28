@@ -18,6 +18,9 @@ import { ReportRoutes } from '../app/modules/report/report.route';
 import { CartRoutes } from '../app/modules/cart/cart.route';
 import { TransactionRoutes } from '../app/modules/transaction/transaction.route';
 import { OrderRoutes } from '../app/modules/order/order.route';
+import { SubscriptionRoutes } from '../app/modules/subscription/subscription.route';
+import { BookingsRoutes } from '../app/modules/bookings/bookings.route';
+import { DigitalRoutes } from '../app/modules/digital/digital.route';
 const router = express.Router();
 
 const apiRoutes = [
@@ -94,6 +97,18 @@ const apiRoutes = [
     route: TransactionRoutes,
   },
   { path: '/order', route: OrderRoutes },
+  {
+    path: '/subscription',
+    route: SubscriptionRoutes,
+  },
+  {
+    path: '/bookings',
+    route: BookingsRoutes,
+  },
+  {
+    path: '/digital',
+    route: DigitalRoutes,
+  },
 ];
 
 apiRoutes.forEach(route => router.use(route.path, route.route));
