@@ -8,6 +8,7 @@ import { sendNotificationToAllUsers } from '../notification/notification.util';
 import { JwtPayload } from 'jsonwebtoken';
 import stripe from '../../../config/stripe';
 import config from '../../../config';
+import { Digital } from '../digital/digital.model';
 
 const createBook = async (data: IProduct) => {
   if (data.image) {
@@ -87,6 +88,15 @@ const purchaseSingleProduct = async (user: JwtPayload, id: string) => {
   const product = await Product.findById(id).lean();
   if (!product) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found!');
+  }
+
+  const isBought = await Digital.findOne({ user: user.id, product: id });
+  // console.log(isBought);
+  if (isBought) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'You already bought this product!',
+    );
   }
 
   const imageUrl = product.image

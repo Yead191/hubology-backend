@@ -1,4 +1,10 @@
-import { ICreateAccount, IResetPassword, IApplicationStatusUpdate, IDonationReceipt, IDonationReceived } from '../types/emailTamplate';
+import {
+  ICreateAccount,
+  IResetPassword,
+  IApplicationStatusUpdate,
+  IDonationReceipt,
+  IDonationReceived,
+} from '../types/emailTamplate';
 import config from '../config';
 import {
   orderConfirmation,
@@ -7,9 +13,14 @@ import {
 } from '../templates/orderTemplate';
 
 const getLogoUrl = () => {
-  const host = config.ip_address === '0.0.0.0' ? 'localhost' : config.ip_address;
-  const base = host && (host.startsWith('http://') || host.startsWith('https://')) ? host : `http://${host}`;
-  return `${base}:${config.port}/logo-hubology.svg`;
+  const host =
+    config.ip_address === '0.0.0.0' ? 'localhost' : config.ip_address;
+  const base =
+    host && (host.startsWith('http://') || host.startsWith('https://'))
+      ? host
+      : `http://${host}`;
+  // return  `${base}:${config.port}/logo-hubology.svg`;
+  return 'https://res.cloudinary.com/dknmebeee/image/upload/v1785238425/logo-hubology_tt7q8f.svg';
 };
 
 const createAccount = (values: ICreateAccount) => {
@@ -96,7 +107,8 @@ const applicationStatusUpdate = (values: IApplicationStatusUpdate) => {
     `;
   } else if (values.status === 'winner') {
     statusText = 'Winner';
-    statusStyle = 'background-color: #fefce8; color: #713f12; border: 1px solid #ca8a04;';
+    statusStyle =
+      'background-color: #fefce8; color: #713f12; border: 1px solid #ca8a04;';
     messageDetailHtml = `
       <div style="margin-top: 24px; padding: 16px; background-color: #fefce8; border: 1px solid #fef08a; border-radius: 8px;">
         <p style="font-size: 15px; color: #713f12; margin: 0; line-height: 1.5; text-align: center;">
@@ -222,12 +234,16 @@ const donationReceipt = (values: IDonationReceipt) => {
                     <td style="font-weight: bold; border-bottom: 1px solid #f3f4f6; padding-left: 0;">Amount Contributed:</td>
                     <td style="border-bottom: 1px solid #f3f4f6; padding-right: 0; font-size: 18px; color: #173616; font-weight: bold;">$${values.amount.toFixed(2)}</td>
                   </tr>
-                  ${values.transactionId ? `
+                  ${
+                    values.transactionId
+                      ? `
                   <tr>
                     <td style="font-weight: bold; padding-left: 0;">Transaction ID:</td>
                     <td style="word-break: break-all; padding-right: 0; font-family: monospace; font-size: 13px;">${values.transactionId}</td>
                   </tr>
-                  ` : ''}
+                  `
+                      : ''
+                  }
                 </table>
               </div>
               
@@ -303,12 +319,16 @@ const donationReceived = (values: IDonationReceived) => {
                     <td style="font-weight: bold; border-bottom: 1px solid #f3f4f6; padding-left: 0;">Donation Amount:</td>
                     <td style="border-bottom: 1px solid #f3f4f6; padding-right: 0; font-size: 18px; color: #173616; font-weight: bold;">$${values.amount.toFixed(2)}</td>
                   </tr>
-                  ${values.transactionId ? `
+                  ${
+                    values.transactionId
+                      ? `
                   <tr>
                     <td style="font-weight: bold; padding-left: 0;">Transaction ID:</td>
                     <td style="word-break: break-all; padding-right: 0; font-family: monospace; font-size: 13px;">${values.transactionId}</td>
                   </tr>
-                  ` : ''}
+                  `
+                      : ''
+                  }
                 </table>
               </div>
               
