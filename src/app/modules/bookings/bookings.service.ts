@@ -33,8 +33,8 @@ const bookingServiceIntoDB = async (user: JwtPayload, payload: IBookings) => {
     payment_method_types: ['card'],
     line_items,
     mode: 'payment',
-    success_url: `${config.frontend_url}/checkout?status=success`,
-    cancel_url: `${config.frontend_url}/checkout?status=failed`,
+    success_url: `${config.frontend_url}/payment/success`,
+    cancel_url: `${config.frontend_url}/payment/failed`,
     customer_email: user.email,
     metadata: {
       userId: user.id.toString(),

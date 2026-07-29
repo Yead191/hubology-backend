@@ -7,9 +7,9 @@ import { StatusCodes } from 'http-status-codes';
 import unlinkFile from '../../../shared/unlinkFile';
 
 const createService = async (payload: IService) => {
-  if (payload.image) {
-    unlinkFile(payload.image);
-  }
+  // if (payload.image) {
+  //   unlinkFile(payload.image);
+  // }
   const result = await Services.create(payload);
   NotificationServices.sendNotificationToAdmins({
     title: 'New Service Added',
@@ -43,7 +43,7 @@ const updateService = async (id: string, payload: Partial<IService>) => {
   if (!isExistService) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Service doesn't exist!");
   }
-  if (payload.image) {
+  if (payload.image && payload.image != isExistService.image) {
     unlinkFile(isExistService.image);
   }
   const result = await Services.findOneAndUpdate(

@@ -70,3 +70,33 @@ export type IOrderStatusUpdate = {
   formattedAddress?: string;
   totalPrice?: number;
 };
+
+export type IVendorStatusUpdate = {
+  email: string;
+  name: string;
+  status: string;
+  rejectionReason?: string;
+};
+
+export type IServiceBookingUserConfirmation = {
+  email: string;
+  name: string;
+  serviceTitle: string;
+  price: number;
+  preferredDate?: string;
+  preferredTime?: string;
+  note?: string;
+  transactionId?: string;
+};
+
+export type IServiceBookingAdminNotification = {
+  adminEmail: string;
+  customerName: string;
+  customerEmail: string;
+  serviceTitle: string;
+  price: number;
+  preferredDate?: string;
+  preferredTime?: string;
+  note?: string;
+  transactionId?: string;
+};

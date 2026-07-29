@@ -41,20 +41,21 @@ const loginUserFromDB = async (payload: ILoginData, res: Response) => {
   if (isExistUser.status === 'blocked') {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      'You don’t have permission to access this content. It looks like your account has been deactivated.'
+      'Your account has been blocked. Please contact the support/administrator for further assistance.',
     );
   }
 
   if (isExistUser.status === 'pending') {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      'Your application has been submitted successfully. We will review your application and notify you via email once it has been approved.'
+      'Your application has been submitted successfully. We will review your application and notify you via email once it has been approved.',
     );
   }
   if (isExistUser.status === 'rejected') {
     throw new ApiError(
-      StatusCodes.BAD_REQUEST, `Your application is rejected. Reason: ${isExistUser.rejectionReason}`
-    )
+      StatusCodes.BAD_REQUEST,
+      `Your application is rejected. Reason: ${isExistUser.rejectionReason}`,
+    );
   }
 
   if (!password) {
@@ -71,9 +72,14 @@ const loginUserFromDB = async (payload: ILoginData, res: Response) => {
 
   //create token
   const createToken = jwtHelper.createToken(
-    { id: isExistUser._id, role: isExistUser.role, email: isExistUser.email, name: isExistUser.name },
+    {
+      id: isExistUser._id,
+      role: isExistUser.role,
+      email: isExistUser.email,
+      name: isExistUser.name,
+    },
     config.jwt.jwt_secret as Secret,
-    config.jwt.jwt_expire_in as string
+    config.jwt.jwt_expire_in as string,
   );
 
   return { createToken };
@@ -114,7 +120,7 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
   if (!oneTimeCode) {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      'Please give the otp, check your email we send a code'
+      'Please give the otp, check your email we send a code',
     );
   }
 
@@ -126,7 +132,7 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
   if (date > isExistUser.authentication?.expireAt) {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      'Otp already expired, Please try again'
+      'Otp already expired, Please try again',
     );
   }
 
@@ -136,7 +142,7 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
   if (!isExistUser.verified) {
     await User.findOneAndUpdate(
       { _id: isExistUser._id },
-      { verified: true, authentication: { oneTimeCode: null, expireAt: null } }
+      { verified: true, authentication: { oneTimeCode: null, expireAt: null } },
     );
     message = 'Email verified successfully';
   } else {
@@ -148,7 +154,7 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
           oneTimeCode: null,
           expireAt: null,
         },
-      }
+      },
     );
 
     //create token ;
@@ -168,7 +174,7 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
 //forget password
 const resetPasswordToDB = async (
   token: string,
-  payload: IAuthResetPassword
+  payload: IAuthResetPassword,
 ) => {
   const { newPassword, confirmPassword } = payload;
   //isExist token
@@ -179,12 +185,12 @@ const resetPasswordToDB = async (
 
   //user permission check
   const isExistUser = await User.findById(isExistToken.user).select(
-    '+authentication'
+    '+authentication',
   );
   if (!isExistUser?.authentication?.isResetPassword) {
     throw new ApiError(
       StatusCodes.UNAUTHORIZED,
-      "You don't have permission to change the password. Please click again to 'Forgot Password'"
+      "You don't have permission to change the password. Please click again to 'Forgot Password'",
     );
   }
 
@@ -193,7 +199,7 @@ const resetPasswordToDB = async (
   if (!isValid) {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      'Token expired, Please click again to the forget password'
+      'Token expired, Please click again to the forget password',
     );
   }
 
@@ -201,13 +207,13 @@ const resetPasswordToDB = async (
   if (newPassword !== confirmPassword) {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      "New password and Confirm password doesn't match!"
+      "New password and Confirm password doesn't match!",
     );
   }
 
   const hashPassword = await bcrypt.hash(
     newPassword,
-    Number(config.bcrypt_salt_rounds)
+    Number(config.bcrypt_salt_rounds),
   );
 
   const updateData = {
@@ -224,7 +230,7 @@ const resetPasswordToDB = async (
 
 const changePasswordToDB = async (
   user: JwtPayload,
-  payload: IChangePassword
+  payload: IChangePassword,
 ) => {
   const { currentPassword, newPassword, confirmPassword } = payload;
   const isExistUser = await User.findById(user.id).select('+password');
@@ -244,21 +250,21 @@ const changePasswordToDB = async (
   if (currentPassword === newPassword) {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      'Please give different password from current password'
+      'Please give different password from current password',
     );
   }
   //new password and confirm password check
   if (newPassword !== confirmPassword) {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
-      "Password and Confirm password doesn't matched"
+      "Password and Confirm password doesn't matched",
     );
   }
 
   //hash password
   const hashPassword = await bcrypt.hash(
     newPassword,
-    Number(config.bcrypt_salt_rounds)
+    Number(config.bcrypt_salt_rounds),
   );
 
   const updateData = {
@@ -271,24 +277,36 @@ const registerUserToDB = async (payload: IRegisterData, res: Response) => {
   const { name, email, password, company, interest } = payload;
   const isExist = await User.findOne({ email: payload.email });
   if (isExist) {
-    if (isExist.status === 'blocked') throw new ApiError(StatusCodes.BAD_REQUEST, 'You don’t have permission to access this content.It looks like your account has been deactivated.');
+    if (isExist.status === 'blocked')
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        'You don’t have permission to access this content.It looks like your account has been deactivated.',
+      );
     if (!isExist.verified) {
       return await AuthHelper.unverifiedAccountHandle(payload.email!, res);
     }
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Email already exist!');
-
   }
 
-  const data = { name, email, password, role: USER_ROLES.USER, company, interest, verified: false, status: 'active' }
+  const data = {
+    name,
+    email,
+    password,
+    role: USER_ROLES.USER,
+    company,
+    interest,
+    verified: false,
+    status: 'active',
+  };
   const createUser = await User.create(data);
   if (!createUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create user');
   }
   NotificationServices.sendNotificationToAdmins({
-    title: "New User Registration",
+    title: 'New User Registration',
     message: `${createUser.name} has registered as a new user`,
     refId: createUser._id,
-    path: `/user/${createUser._id}`
+    path: `/user/${createUser._id}`,
   });
   //send email
   const otp = generateOTP();
@@ -307,11 +325,11 @@ const registerUserToDB = async (payload: IRegisterData, res: Response) => {
   };
   await User.findOneAndUpdate(
     { _id: createUser._id },
-    { $set: { authentication } }
+    { $set: { authentication } },
   );
 
   return createUser;
-}
+};
 
 const registerVendorToDB = async (payload: any, res: Response) => {
   console.log(payload);
@@ -331,7 +349,7 @@ const registerVendorToDB = async (payload: any, res: Response) => {
       if (isExist.status === 'blocked') {
         throw new ApiError(
           StatusCodes.BAD_REQUEST,
-          'You don’t have permission to access this content. It looks like your account has been deactivated.'
+          'You don’t have permission to access this content. It looks like your account has been deactivated.',
         );
       }
       if (!isExist.verified) {
@@ -343,17 +361,17 @@ const registerVendorToDB = async (payload: any, res: Response) => {
     const createVendor = await User.create({
       ...payload,
       role: USER_ROLES.VENDOR,
-      status: "pending"
+      status: 'pending',
     });
     if (!createVendor) {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create user');
     }
 
     NotificationServices.sendNotificationToAdmins({
-      title: "New Vendor Registration",
+      title: 'New Vendor Registration',
       message: `${createVendor.name} has registered as a new Vendor`,
       refId: createVendor._id,
-      path: `/vendor/profile/${createVendor._id}`
+      path: `/vendor/profile/${createVendor._id}`,
     });
     // Send email
     const otp = generateOTP();
@@ -372,7 +390,7 @@ const registerVendorToDB = async (payload: any, res: Response) => {
     };
     await User.findOneAndUpdate(
       { _id: createVendor._id },
-      { $set: { authentication } }
+      { $set: { authentication } },
     );
 
     return createVendor;
@@ -385,7 +403,6 @@ const registerVendorToDB = async (payload: any, res: Response) => {
   }
 };
 
-
 export const AuthService = {
   verifyEmailToDB,
   loginUserFromDB,
@@ -393,5 +410,5 @@ export const AuthService = {
   resetPasswordToDB,
   changePasswordToDB,
   registerUserToDB,
-  registerVendorToDB
+  registerVendorToDB,
 };

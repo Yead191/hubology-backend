@@ -51,7 +51,7 @@ const getDigitalProducts = async (
 };
 
 const getMySingleProduct = async (user: JwtPayload, id: string) => {
-  const isExist = await Digital.findById(id)
+  const isExist = await Digital.findOne({ product: id, user: user.id })
     .populate({
       path: 'user',
       select: 'name email role',

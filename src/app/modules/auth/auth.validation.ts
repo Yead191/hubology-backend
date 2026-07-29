@@ -107,78 +107,72 @@ const createRegisterVendorZodSchema = z.object({
       })
       .min(2, 'Please enter your company'),
 
-    vendorProfile: z.string().refine((value) => {
-      const parseData = JSON.parse(value)
-      const validData = developerProfileSchema.parse(parseData)
-      return !!validData
-    })
-  })
-})
-
+    vendorProfile: z.string().refine(value => {
+      const parseData = JSON.parse(value);
+      const validData = developerProfileSchema.parse(parseData);
+      return !!validData;
+    }),
+  }),
+});
 
 export const developerProfileSchema = z.object({
   jobTitle: z
     .string()
-    .min(2, "Job title is required")
-    .max(100, "Job title is too long"),
+    .min(2, 'Job title is required')
+    .max(100, 'Job title is too long'),
 
   contactNo: z
     .string()
-    .min(10, "Invalid contact number")
-    .max(20, "Invalid contact number")
-    .regex(/^\+?[0-9]+$/, "Invalid phone number"),
+    .min(10, 'Invalid contact number')
+    .max(20, 'Invalid contact number')
+    .regex(/^\+?[0-9]+$/, 'Invalid phone number'),
 
   bio: z
     .string()
-    .min(10, "Bio must be at least 10 characters")
-    .max(500, "Bio cannot exceed 500 characters"),
+    .min(10, 'Bio must be at least 10 characters')
+    .max(500, 'Bio cannot exceed 500 characters'),
 
   expertise: z
     .array(z.string().min(1))
-    .min(1, "Select at least one expertise")
+    .min(1, 'Select at least one expertise')
     .refine(
-      (items) => new Set(items).size === items.length,
-      "Expertise must not contain duplicates"
+      items => new Set(items).size === items.length,
+      'Expertise must not contain duplicates',
     ),
 
-  yearsExperience: z
-    .string()
-    .refine(
-      (val) => !isNaN(Number(val)) && Number(val) >= 0,
-      "Years of experience must be a valid number"
-    ),
+  // yearsExperience: z
+  //   .string()
+  //   .refine(
+  //     val => !isNaN(Number(val)) && Number(val) >= 0,
+  //     'Years of experience must be a valid number',
+  //   ),
+  yearsExperience: z.string().min(1, 'Select your years of experience'),
 
-  degree: z
-    .string()
-    .min(2, "Degree is required")
-    .max(100),
+  degree: z.string().min(2, 'Degree is required').max(100),
 
-  linkedin: z
-    .string()
-    .url("Invalid LinkedIn URL")
-    .optional()
-    .or(z.literal("")),
+  linkedin: z.string().url('Invalid LinkedIn URL').optional().or(z.literal('')),
 
   hourlyRate: z
     .number()
     .refine(
-      (val) => !isNaN(Number(val)) && Number(val) > 0,
-      "Hourly rate must be greater than 0"
+      val => !isNaN(Number(val)) && Number(val) > 0,
+      'Hourly rate must be greater than 0',
     ),
 
-  availability: z.enum(["Full Time", "Part Time", "Project Based", "Weekends Only", "Limited"]),
+  availability: z.enum([
+    'Full Time',
+    'Part Time',
+    'Project Based',
+    'Weekends Only',
+    'Limited',
+  ]),
 
   consultationTypes: z
-    .array(z.enum(["Online", "Onsite"]))
-    .min(1, "Select at least one consultation type"),
+    .array(z.string())
+    .min(1, 'Select at least one consultation type'),
 
-  applicationStatus: z.enum([
-    "pending",
-    "approved",
-    "rejected",
-  ]),
+  applicationStatus: z.enum(['pending', 'approved', 'rejected']),
 });
-
 
 export const AuthValidation = {
   createVerifyEmailZodSchema,
@@ -187,5 +181,5 @@ export const AuthValidation = {
   createResetPasswordZodSchema,
   createChangePasswordZodSchema,
   createRegisterVendorZodSchema,
-  createRegisterUserZodSchema
+  createRegisterUserZodSchema,
 };

@@ -11,6 +11,11 @@ import {
   adminOrderNotification,
   orderStatusUpdate,
 } from '../templates/orderTemplate';
+import { vendorStatusUpdate } from '../templates/vendorTemplate';
+import {
+  serviceBookingUserConfirmation,
+  serviceBookingAdminNotification,
+} from '../templates/serviceBookingTemplate';
 
 const getLogoUrl = () => {
   const host =
@@ -20,7 +25,7 @@ const getLogoUrl = () => {
       ? host
       : `http://${host}`;
   // return  `${base}:${config.port}/logo-hubology.svg`;
-  return 'https://res.cloudinary.com/dknmebeee/image/upload/v1785238425/logo-hubology_tt7q8f.svg';
+  return 'https://res.cloudinary.com/dknmebeee/image/upload/v1785305810/logo-hubology_1x_tnmfnk.png';
 };
 
 const createAccount = (values: ICreateAccount) => {
@@ -368,4 +373,7 @@ export const emailTemplate = {
   orderConfirmation,
   adminOrderNotification,
   orderStatusUpdate,
+  vendorStatusUpdate,
+  serviceBookingUserConfirmation,
+  serviceBookingAdminNotification,
 };

@@ -10,6 +10,10 @@ import {
   TRANSACTION_TYPE,
 } from '../enums/transaction';
 import { NotificationServices } from '../app/modules/notification/notification.service';
+import { emailHelper } from '../helpers/emailHelper';
+import { emailTemplate } from '../shared/emailTemplate';
+import config from '../config';
+import { USER_ROLES } from '../enums/user';
 
 export const handleServiceBooking = async (
   checkoutSession: Stripe.Checkout.Session,
@@ -30,7 +34,6 @@ export const handleServiceBooking = async (
     const serviceDetails = await Services.findById(serviceId)
       .lean()
       .session(mongoSession);
-    // console.log('service details', serviceDetails);
 
     // 1. Find User
     let user: any = null;
@@ -47,7 +50,6 @@ export const handleServiceBooking = async (
       (checkoutSession.payment_intent as string) || checkoutSession.id;
 
     // 2. Update Booking record status
-
     await Bookings.create({
       user: user._id,
       service: serviceId!,
@@ -80,7 +82,7 @@ export const handleServiceBooking = async (
     await mongoSession.commitTransaction();
     mongoSession.endSession();
 
-    // 4. Send Notifications & Email
+    // 4. Send In-App Notifications
     try {
       await NotificationServices.createNotification({
         receiver: user._id,
@@ -104,22 +106,61 @@ export const handleServiceBooking = async (
       console.error('Failed to send admin notification:', notifErr);
     }
 
+    // 5. Send Email to User
     if (user.email) {
       try {
-        // const emailData = emailTemplate.orderStatusUpdate({
-        //   email: user.email,
-        //   name: user.name || 'Member',
-        //   orderId: membership.name,
-        //   status: `Active (${membership.name})`,
-        //   totalPrice: membership.price,
-        // });
-        // await emailHelper.sendEmail(emailData);
+        const userEmailData = emailTemplate.serviceBookingUserConfirmation({
+          email: user.email,
+          name: user.name || 'Customer',
+          serviceTitle: serviceDetails?.title || 'Service',
+          price: priceAmount,
+          preferredDate: metadata?.preferredDate || '',
+          preferredTime: metadata?.preferredTime || '',
+          note: metadata?.note || '',
+          transactionId: paymentTxnId,
+        });
+        await emailHelper.sendEmail(userEmailData);
       } catch (emailErr) {
         console.error(
-          'Failed to send subscription confirmation email:',
+          'Failed to send user service booking email:',
           emailErr,
         );
       }
+    }
+
+    // 6. Send Email to Super Admin & Admins
+    try {
+      const admins = await User.find({
+        $or: [{ role: USER_ROLES.ADMIN }, { role: USER_ROLES.SUPER_ADMIN }],
+      });
+
+      const adminEmails = Array.from(
+        new Set(
+          [...admins.map(a => a.email), config.super_admin.email].filter(
+            Boolean,
+          ),
+        ),
+      );
+
+      for (const adminEmail of adminEmails) {
+        const adminEmailData = emailTemplate.serviceBookingAdminNotification({
+          adminEmail: adminEmail as string,
+          customerName: user.name || 'Customer',
+          customerEmail: user.email || 'N/A',
+          serviceTitle: serviceDetails?.title || 'Service',
+          price: priceAmount,
+          preferredDate: metadata?.preferredDate || '',
+          preferredTime: metadata?.preferredTime || '',
+          note: metadata?.note || '',
+          transactionId: paymentTxnId,
+        });
+        await emailHelper.sendEmail(adminEmailData);
+      }
+    } catch (emailErr) {
+      console.error(
+        'Failed to send admin service booking notification email:',
+        emailErr,
+      );
     }
   } catch (error) {
     mongoSession.abortTransaction();

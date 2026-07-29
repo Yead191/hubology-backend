@@ -11,13 +11,6 @@ import config from '../../../config';
 import { Digital } from '../digital/digital.model';
 
 const createBook = async (data: IProduct) => {
-  if (data.image) {
-    unlinkFile(data.image);
-  }
-  if (data.file) {
-    unlinkFile(data.file);
-  }
-
   const result = await Product.create(data);
   sendNotificationToAllUsers({
     title: 'New Product Published',
@@ -57,11 +50,11 @@ const updateBook = async (id: string, payload: IProduct) => {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Product not found');
   }
 
-  if (payload.image) {
-    unlinkFile(payload.image);
+  if (payload.image && isExist.image !== payload.image) {
+    unlinkFile(isExist.image);
   }
-  if (payload.file) {
-    unlinkFile(payload.file);
+  if (payload.file && isExist.file !== payload.file) {
+    unlinkFile(isExist.file!);
   }
 
   const result = await Product.findOneAndUpdate(
@@ -91,6 +84,7 @@ const purchaseSingleProduct = async (user: JwtPayload, id: string) => {
   }
 
   const isBought = await Digital.findOne({ user: user.id, product: id });
+  // console.log(isBought);
   // console.log(isBought);
   if (isBought) {
     throw new ApiError(
@@ -122,8 +116,8 @@ const purchaseSingleProduct = async (user: JwtPayload, id: string) => {
     payment_method_types: ['card'],
     line_items: line_items,
     mode: 'payment',
-    success_url: `${config.frontend_url}/store`,
-    cancel_url: `${config.frontend_url}/store`,
+    success_url: `${config.frontend_url}/payment/success?type=digital`,
+    cancel_url: `${config.frontend_url}/payment/failed?type=digital`,
     customer_email: user.email,
     metadata: {
       userId: user?.id!.toString(),
