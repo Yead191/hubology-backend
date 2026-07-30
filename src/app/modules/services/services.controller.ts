@@ -32,12 +32,13 @@ const createService = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllServices = catchAsync(async (req: Request, res: Response) => {
-  const result = await ServicesServices.getAllServices();
+  const result = await ServicesServices.getAllServices(req.query);
   return sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
     message: 'All services retrived successfully!',
-    data: result,
+    data: result.services,
+    pagination: result.pagination,
   });
 });
 

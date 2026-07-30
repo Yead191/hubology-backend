@@ -69,7 +69,6 @@ export const handleServiceBooking = async (
           user: user._id,
           total_price: priceAmount,
           payment_received: priceAmount,
-          platform_fee: 0,
           status: TRANSACTION_STATUS.SUCCESS,
           type: TRANSACTION_TYPE.CREDIT,
           category: TRANSACTION_CATEGORY.SERVICE,
@@ -121,10 +120,7 @@ export const handleServiceBooking = async (
         });
         await emailHelper.sendEmail(userEmailData);
       } catch (emailErr) {
-        console.error(
-          'Failed to send user service booking email:',
-          emailErr,
-        );
+        console.error('Failed to send user service booking email:', emailErr);
       }
     }
 

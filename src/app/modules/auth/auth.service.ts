@@ -332,7 +332,7 @@ const registerUserToDB = async (payload: IRegisterData, res: Response) => {
 };
 
 const registerVendorToDB = async (payload: any, res: Response) => {
-  console.log(payload);
+  // console.log(payload);
 
   const payloadData = payload.body || payload;
   const email = payloadData.email;

@@ -40,9 +40,9 @@ const cartSchema = new Schema<ICart, CartModel>(
 cartSchema.index({ user: 1 });
 
 cartSchema.pre('save', async function (next) {
-  console.log(this.product);
+  // console.log(this.product);
   const productInfo = await Product.findById(this.product);
-  console.log(productInfo);
+  // console.log(productInfo);
   if (!productInfo) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Product not found');
   }

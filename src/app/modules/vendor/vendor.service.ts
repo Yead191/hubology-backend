@@ -35,7 +35,7 @@ const getVendorsFromDB = async (
     )
       .paginate()
       .sort()
-      .search(['name', 'email', 'company'])
+      .search(['name', 'email', 'company', 'vendorProfile.bio'])
       .filter(['availability', 'hourlyRateRange'])
       .fields();
   }
@@ -90,7 +90,7 @@ const changeVendorStatus = async (id: string, payload: Pick<IUser, any>) => {
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid user id');
   }
-  const isExist = await User.findById({ _id: id });
+  const isExist = await User.findById(id);
   if (!isExist || isExist.role !== USER_ROLES.VENDOR) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Vendor not found');
   }

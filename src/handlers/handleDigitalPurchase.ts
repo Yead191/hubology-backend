@@ -34,6 +34,11 @@ export const handleDigitalPurchase = async (
     if (!productInfo) {
       throw new Error('Product not found!');
     }
+    await Product.findOneAndUpdate(
+      { _id: productId },
+      { $inc: { sold: 1 } },
+      { new: true, session },
+    );
 
     const user = await User.findById(userId).session(session);
     if (!user) {
@@ -66,8 +71,6 @@ export const handleDigitalPurchase = async (
             user: user._id,
             total_price: Number(productInfo.price),
             payment_received: Number(productInfo.price),
-            discount_amount: 0,
-            platform_fee: 0,
             status: TRANSACTION_STATUS.SUCCESS,
             type: TRANSACTION_TYPE.CREDIT,
             category: TRANSACTION_CATEGORY.SHOP,

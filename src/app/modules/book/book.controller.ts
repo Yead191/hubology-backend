@@ -5,26 +5,24 @@ import { StatusCodes } from 'http-status-codes';
 import { getSingleFilePath } from '../../../shared/getFilePath';
 import catchAsync from '../../../shared/catchAsync';
 
-const getAllBooks = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const result = await BookServices.getAllBooks(req.query);
-    return sendResponse(res, {
-      success: true,
-      statusCode: StatusCodes.OK,
-      message: 'Books retrived successfully!',
-      data: result.books,
-      pagination: result.pagination,
-    });
-  },
-);
+const getAllBooks = catchAsync(async (req: Request, res: Response) => {
+  const result = await BookServices.getAllBooks(req.query);
+  return sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Books retrived successfully!',
+    data: result.books,
+    pagination: result.pagination,
+  });
+});
 
 const createBook = catchAsync(async (req: Request, res: Response) => {
   // console.log(req.body, 'control')
-  console.log(req.files, 'files');
+  // console.log(req.files, 'files');
   let data = { ...req.body };
   const image = getSingleFilePath(req.files, 'image');
   const doc = getSingleFilePath(req.files, 'doc');
-  console.log(image);
+  // console.log(image);
   if (image) {
     data.image = image;
   }

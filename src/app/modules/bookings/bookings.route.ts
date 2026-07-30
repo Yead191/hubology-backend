@@ -13,4 +13,11 @@ router
   )
   .get(auth(), BookingsController.getAllBookings);
 
+router
+  .route('/:id')
+  .patch(
+    auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+    BookingsController.updateBookingStatus,
+  );
+
 export const BookingsRoutes = router;

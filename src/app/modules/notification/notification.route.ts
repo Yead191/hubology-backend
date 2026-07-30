@@ -13,6 +13,10 @@ router.route('/')
     .post(
         auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
         NotificationController.createNotification
+    )
+    .patch(
+        auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER, USER_ROLES.VENDOR),
+        NotificationController.readAllNotifications
     );
 
 router.route('/:id')
@@ -22,7 +26,7 @@ router.route('/:id')
     )
     .patch(
         auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER, USER_ROLES.VENDOR),
-        NotificationController.updateNotification
+        NotificationController.readSingleNotification
     )
     .delete(
         auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER, USER_ROLES.VENDOR),

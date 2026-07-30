@@ -128,7 +128,6 @@ export const handleMembershipCheckout = async (
           user: user._id,
           total_price: membership.price,
           payment_received: membership.price,
-          platform_fee: 0,
           status: TRANSACTION_STATUS.SUCCESS,
           type: TRANSACTION_TYPE.CREDIT,
           category: TRANSACTION_CATEGORY.MEMBERSHIP,

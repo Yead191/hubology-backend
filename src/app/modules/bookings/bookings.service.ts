@@ -52,17 +52,28 @@ const bookingServiceIntoDB = async (user: JwtPayload, payload: IBookings) => {
 };
 
 const getAllBookings = async (user: JwtPayload, query: Record<string, any>) => {
-  const initQuery = [USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN].includes(
-    user.role,
-  )
+  const initQuery: Record<string, any> = [
+    USER_ROLES.SUPER_ADMIN,
+    USER_ROLES.ADMIN,
+  ].includes(user.role)
     ? { paymentStatus: 'paid' }
     : { user: user.id, paymentStatus: 'paid' };
+
+  if (query?.startDate || query?.endDate) {
+    initQuery.preferredDate = {};
+    if (query.startDate) {
+      initQuery.preferredDate.$gte = new Date(query.startDate as string);
+    }
+    if (query.endDate) {
+      initQuery.preferredDate.$lte = new Date(query.endDate as string);
+    }
+  }
 
   const qb = new QueryBuilder(
     Bookings.find(initQuery)
       .populate({
         path: 'user',
-        select: 'name email',
+        select: 'name email image',
       })
       .populate({
         path: 'service',
@@ -70,8 +81,8 @@ const getAllBookings = async (user: JwtPayload, query: Record<string, any>) => {
       }),
     query,
   )
-    .search(['user.name', 'service.title'])
-    .filter()
+    .search(['user.name', 'service.title', 'paymentIntentId'])
+    .filter(['startDate', 'endDate'])
     .paginate()
     .sort()
     .fields();
@@ -84,7 +95,21 @@ const getAllBookings = async (user: JwtPayload, query: Record<string, any>) => {
   return { bokkings, pagination };
 };
 
+const updateBookingStatus = async (id: string, payload: { status: string }) => {
+  const booking = await Bookings.findById(id).lean();
+  if (!booking) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Booking not found!');
+  }
+  const result = await Bookings.findOneAndUpdate(
+    { _id: id },
+    { $set: { status: payload.status } },
+    { new: true },
+  );
+  return result;
+};
+
 export const BookingsServices = {
   bookingServiceIntoDB,
   getAllBookings,
+  updateBookingStatus,
 };

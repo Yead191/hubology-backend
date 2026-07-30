@@ -60,10 +60,34 @@ const deleteNotification = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const readSingleNotification = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await NotificationServices.readSingleNotification(id);
+    return sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'Notification marked as read successfully!',
+        data: result
+    });
+});
+
+const readAllNotifications = catchAsync(async (req: Request, res: Response) => {
+    const user = req.user;
+    const result = await NotificationServices.readAllNotifications(user);
+    return sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'All notifications marked as read successfully!',
+        data: result
+    });
+});
+
 export const NotificationController = {
     getAllNotifications,
     createNotification,
     getSingleNotification,
     updateNotification,
-    deleteNotification
+    deleteNotification,
+    readSingleNotification,
+    readAllNotifications
 };

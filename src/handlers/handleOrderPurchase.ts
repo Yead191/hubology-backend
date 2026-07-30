@@ -30,6 +30,7 @@ export const handleOrderPurchase = async (
       .populate('user')
       .session(session);
 
+    // console.log(orderDetails);
     if (!orderDetails) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Order not found');
     }
@@ -40,8 +41,7 @@ export const handleOrderPurchase = async (
           {
             user: userId,
             total_price: orderDetails.price_breakdown.total_price,
-            payment_received: 0,
-            discount_amount: 0,
+            payment_received: orderDetails.price_breakdown.total_price,
             platform_fee: orderDetails.price_breakdown.serviceFee,
             status: TRANSACTION_STATUS.SUCCESS,
             type: TRANSACTION_TYPE.CREDIT,
@@ -119,7 +119,10 @@ export const handleOrderPurchase = async (
         });
         await emailHelper.sendEmail(userEmailData);
       } catch (emailErr) {
-        console.error('Failed to send user order confirmation email:', emailErr);
+        console.error(
+          'Failed to send user order confirmation email:',
+          emailErr,
+        );
       }
     }
 
@@ -131,10 +134,9 @@ export const handleOrderPurchase = async (
 
       const adminEmails = Array.from(
         new Set(
-          [
-            ...admins.map(a => a.email),
-            config.super_admin.email,
-          ].filter(Boolean),
+          [...admins.map(a => a.email), config.super_admin.email].filter(
+            Boolean,
+          ),
         ),
       );
 

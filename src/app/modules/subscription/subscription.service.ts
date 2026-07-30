@@ -5,6 +5,7 @@ import ApiError from '../../../errors/ApiError';
 import stripe from '../../../config/stripe';
 import config from '../../../config';
 import { Subscription } from './subscription.model';
+import QueryBuilder from '../../builder/QueryBuilder';
 
 const subscribePackage = async (user: JwtPayload, packageId: string) => {
   const membership = await Membership.findOne({ _id: packageId });
@@ -48,7 +49,31 @@ const getMySubcription = async (user: JwtPayload) => {
   return result;
 };
 
+const getSubsribersByPackage = async (
+  id: string,
+  query: Record<string, any>,
+) => {
+  const qb = new QueryBuilder(
+    Subscription.find({ plan: id })
+      .populate('user', 'name email image')
+      .populate('plan', 'name'),
+    query,
+  )
+    .search([])
+    .filter()
+    .paginate()
+    .sort()
+    .fields();
+
+  const [data, pagination] = await Promise.all([
+    qb.modelQuery,
+    qb.getPaginationInfo(),
+  ]);
+  return { data, pagination };
+};
+
 export const SubscriptionServices = {
   subscribePackage,
   getMySubcription,
+  getSubsribersByPackage,
 };

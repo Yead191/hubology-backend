@@ -112,8 +112,29 @@ const updateProfileToDB = async (
 
 const getAllUsersFromDB = async (query: Record<string, any>) => {
   // const userQuery = new QueryBuilder(User.find({ role: { $nin: [USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN] }, verified: true }), query).paginate().sort().search(['name', 'email']).filter().fields()
+  const filter: Record<string, any> = {
+    role: USER_ROLES.USER,
+    verified: true,
+  };
+
+  if (query.hasSubscription === 'true') {
+    filter.subscription = { $exists: true, $ne: null };
+  }
+
+  if (query.hasSubscription === 'false') {
+    filter.subscription = { $in: [null, undefined] };
+  }
+
+  delete query.hasSubscription;
   const userQuery = new QueryBuilder(
-    User.find({ role: USER_ROLES.USER, verified: true }),
+    User.find(filter).populate({
+      path: 'subscription',
+      // select: 'name start_date end_date',
+      // populate: {
+      //   path: 'plan',
+      //   select: 'name',
+      // },
+    }),
     query,
   )
     .paginate()

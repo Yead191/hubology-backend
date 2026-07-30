@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import ApiError from '../../../errors/ApiError';
 import { StatusCodes } from 'http-status-codes';
 import unlinkFile from '../../../shared/unlinkFile';
+import QueryBuilder from '../../builder/QueryBuilder';
 
 const createService = async (payload: IService) => {
   // if (payload.image) {
@@ -20,9 +21,21 @@ const createService = async (payload: IService) => {
   return result;
 };
 
-const getAllServices = async () => {
-  const result = await Services.find().sort({ createdAt: -1 });
-  return result;
+const getAllServices = async (query: Record<string, any>) => {
+  // const result = await Services.find().sort({ createdAt: -1 });
+  // return result;
+
+  const qb = new QueryBuilder(Services.find(), query)
+    .search(['title', 'tagline'])
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+  const [services, pagination] = await Promise.all([
+    qb.modelQuery.lean(),
+    qb.getPaginationInfo(),
+  ]);
+  return { services, pagination };
 };
 const getSingleService = async (id: string) => {
   if (!mongoose.Types.ObjectId.isValid(id)) {

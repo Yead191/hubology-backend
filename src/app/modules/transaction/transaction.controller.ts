@@ -8,8 +8,9 @@ const getTransactions = catchAsync(async (req: Request, res: Response) => {
   return sendResponse(res, {
     statusCode: 200,
     success: true,
-    data: result,
     message: 'Transactions fetched successfully',
+    data: result.transactions,
+    pagination: result.pagination,
   });
 });
 

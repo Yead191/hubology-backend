@@ -12,7 +12,11 @@ import { handleChunkUpload } from './helpers/handleChunkUpload';
 import { fileStreamHandler } from './helpers/fileStreamingHelper';
 import { handleStripeWebhook } from './webhooks/handleStripeWebhook';
 const app = express();
-app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), handleStripeWebhook); /// stripe webhook
+app.post(
+  '/api/stripe/webhook',
+  express.raw({ type: 'application/json' }),
+  handleStripeWebhook,
+); /// stripe webhook
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 1000,
@@ -20,21 +24,29 @@ const limiter = rateLimit({
   legacyHeaders: false,
   keyGenerator: (req, res) => {
     if (!req.clientIp) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, 'Unable to determine client IP!');
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        'Unable to determine client IP!',
+      );
     }
     return req.clientIp;
   },
   handler: (req, res, next, options) => {
-    throw new ApiError(options?.statusCode, `Rate limit exceeded. Try again in ${options.windowMs / 60000} minutes.`);
-  }
+    throw new ApiError(
+      options?.statusCode,
+      `Rate limit exceeded. Try again in ${options.windowMs / 60000} minutes.`,
+    );
+  },
 });
 
-app.use(session({
-  secret: "your_secret_key",
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false } // Secure should be true in production with HTTPS
-}));
+app.use(
+  session({
+    secret: 'your_secret_key',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }, // Secure should be true in production with HTTPS
+  }),
+);
 app.use(requestIp.mw());
 app.use(limiter);
 //morgan
@@ -42,31 +54,37 @@ app.use(Morgan.successHandler);
 app.use(Morgan.errorHandler);
 
 //body parser
-app.use(cors({
-  origin: ['http://localhost:3001', 'http://localhost:3000', 'http://localhost:5173'],
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: [
+      'http://localhost:3001',
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'http://localhost:5174',
+    ],
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 //file retrieve
-app.use("/files/:folder/:file", fileStreamHandler);
+app.use('/files/:folder/:file', fileStreamHandler);
 app.use(express.static('public'));
 // app.use(express.static('uploads'));
 //router
 app.post('/api/v1/upload/chunk', handleChunkUpload);
 app.use('/api/v1', router);
 
-
 //live response
 app.get('/', (req: Request, res: Response) => {
   const date = new Date(Date.now());
-  const io = global.socketServer!
+  const io = global.socketServer!;
   io.emit('message', 'Hello from the server!');
   res.send(
     `<h1 style="text-align:center; color:#173616; font-family:Verdana;">Beep-beep! The server is alive and kicking.</h1>
     <p style="text-align:center; color:#173616; font-family:Verdana;">${date}</p>
-    `
+    `,
   );
 });
 

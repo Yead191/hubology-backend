@@ -9,6 +9,7 @@ import { JwtPayload } from 'jsonwebtoken';
 import stripe from '../../../config/stripe';
 import config from '../../../config';
 import { Digital } from '../digital/digital.model';
+import { USER_ROLES } from '../../../enums/user';
 
 const createBook = async (data: IProduct) => {
   const result = await Product.create(data);
@@ -21,6 +22,12 @@ const createBook = async (data: IProduct) => {
 };
 
 const getAllBooks = async (query: Record<string, any>) => {
+  // const initQuery = [USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN].includes(
+  //   user.role,
+  // )
+  //   ? {}
+  //   : { 'details.status': 'in-stock' };
+
   const booksQuery = new QueryBuilder(Product.find(), query)
     .search(['title'])
     .filter()

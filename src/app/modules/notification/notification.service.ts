@@ -97,6 +97,28 @@ const deleteNotification = async (id: string) => {
   return result;
 };
 
+const readSingleNotification = async (id: string) => {
+  const isExist = await Notification.findById(id);
+  if (!isExist) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Notification not found');
+  }
+
+  const result = await Notification.findOneAndUpdate(
+    { _id: id },
+    { $set: { seen: true } },
+    { new: true },
+  );
+  return result;
+};
+
+const readAllNotifications = async (user: JwtPayload) => {
+  const result = await Notification.updateMany(
+    { receiver: user.id, seen: false },
+    { $set: { seen: true } },
+  );
+  return result;
+};
+
 export const NotificationServices = {
   createNotification,
   sendNotificationToAdmins,
@@ -104,4 +126,6 @@ export const NotificationServices = {
   getSingleNotification,
   updateNotification,
   deleteNotification,
+  readSingleNotification,
+  readAllNotifications,
 };

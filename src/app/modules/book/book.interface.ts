@@ -1,7 +1,7 @@
-import { Model } from "mongoose";
+import { Model } from 'mongoose';
 
-export type ProductType = 'digital' | 'office'
-export type status = 'in-stock' | 'out-stock'
+export type ProductType = 'digital' | 'office';
+export type status = 'in-stock' | 'out-stock';
 
 export interface IproductDetails {
   // digital product
@@ -18,7 +18,7 @@ export interface IproductDetails {
 }
 
 export interface IProduct {
-  type: ProductType
+  type: ProductType;
   title: string;
   subtitle: string;
   description: string;
@@ -26,9 +26,10 @@ export interface IProduct {
   price: number;
   image: string;
   accent?: string[];
-  file?: string
-  details: IproductDetails
-  status: status
+  file?: string;
+  details: IproductDetails;
+  status: status;
+  sold?: number;
 }
 
-export type ProductModel = Model<IProduct>
+export type ProductModel = Model<IProduct>;

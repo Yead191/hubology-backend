@@ -30,7 +30,24 @@ const getMySubcription = catchAsync(
   },
 );
 
+const getSubsribersByPackage = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await SubscriptionServices.getSubsribersByPackage(
+      req.params.id,
+      req.query,
+    );
+    return sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: 'Subcribers retrieved successfully!',
+      data: result.data,
+      pagination: result.pagination,
+    });
+  },
+);
+
 export const SubscriptionController = {
   subscribePackage,
   getMySubcription,
+  getSubsribersByPackage,
 };

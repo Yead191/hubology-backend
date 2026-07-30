@@ -16,22 +16,39 @@ router
     (req: Request, res: Response, next: NextFunction) => {
       if (req.body.data) {
         req.body = UserValidation.updateUserZodSchema.parse(
-          JSON.parse(req.body.data)
+          JSON.parse(req.body.data),
         );
       }
       return UserController.updateProfile(req, res, next);
-    }
+    },
   );
 
 router
   .route('/')
   .post(
     validateRequest(UserValidation.createUserZodSchema),
-    UserController.createUser
-  ).get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), UserController.getAllUsers)
+    UserController.createUser,
+  )
+  .get(
+    auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+    UserController.getAllUsers,
+  );
+router
+  .route('/change-status/:id')
+  .patch(
+    auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+    UserController.changeStatusOfUser,
+  );
 
-router.route("/:id").get(auth(), UserController.getSingleUser).delete(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), UserController.deleteUser)
-router.route("/:id/change-status").patch(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), UserController.changeStatusOfUser)
+router
+  .route('/:id')
+  .get(auth(), UserController.getSingleUser)
+  .delete(
+    auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+    UserController.deleteUser,
+  );
 
-router.route('/upload-file').post(fileUploadHandler(), UserController.uploadFile);
+router
+  .route('/upload-file')
+  .post(fileUploadHandler(), UserController.uploadFile);
 export const UserRoutes = router;

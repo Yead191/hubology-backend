@@ -138,7 +138,13 @@ const getOrdersFromDB = async (
     }),
     query,
   )
-    .search(['title', 'order_id', 'transaction_id', 'contact_number'])
+    .search([
+      'title',
+      'order_id',
+      'transaction_id',
+      'contact_number',
+      'payment_intent_id',
+    ])
     .filter()
     .paginate()
     .sort()

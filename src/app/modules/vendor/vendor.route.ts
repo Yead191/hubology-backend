@@ -2,9 +2,10 @@ import express from 'express';
 import auth from '../../middlewares/auth';
 import { VendorController } from './vendor.controller';
 import { USER_ROLES } from '../../../enums/user';
+import tempAuth from '../../middlewares/tempAuth';
 const router = express.Router();
 
-router.route('/').get(VendorController.getAllVendors);
+router.route('/').get(tempAuth(), VendorController.getAllVendors);
 router.route('/:id').get(VendorController.getSingleVendor);
 router
   .route('/change-status/:id')
