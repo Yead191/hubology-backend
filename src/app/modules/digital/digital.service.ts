@@ -1,5 +1,4 @@
 import { JwtPayload } from 'jsonwebtoken';
-import { DigitalModel } from './digital.interface';
 import { USER_ROLES } from '../../../enums/user';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { Digital } from './digital.model';

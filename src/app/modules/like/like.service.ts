@@ -9,92 +9,98 @@ import { Notification } from '../notification/notification.model';
 import { User } from '../user/user.model';
 
 const toggleLikeToDB = async (user: JwtPayload, postId: string) => {
-    const post = await Community.findById({ _id: postId })
-    if (!post) {
-        throw new ApiError(StatusCodes.BAD_REQUEST, "This post is not found!")
-    }
-    if (post.status === "removed") {
-        throw new ApiError(StatusCodes.BAD_REQUEST, "This post is removed by admin!")
-    }
-    const existingLike = await Like.findOne({
-        post: postId,
-        user: user.id
-    })
-
-    if (existingLike) {
-        await Like.findByIdAndDelete(existingLike._id);
-    } else {
-        const likedBy = await User.findById({ _id: user.id })
-        await Like.create({
-            post: postId,
-            user: user.id,
-        });
-        await Notification.create({
-            receiver: post.author,
-            title: `${likedBy?.name} liked your post`,
-            seen: false,
-            path: `/forum/${postId}`,
-            refId: postId,
-            type: "like"
-        })
-    }
-
-    const updatedPost = await Community.findByIdAndUpdate(
-        postId,
-        {
-            $inc: {
-                totalLikes: existingLike ? -1 : 1,
-            },
-        },
-        {
-            new: true,
-            select: 'totalLikes',
-        }
+  const post = await Community.findById({ _id: postId });
+  if (!post) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'This post is not found!');
+  }
+  if (post.status === 'removed') {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'This post is removed by admin!',
     );
+  }
+  const existingLike = await Like.findOne({
+    post: postId,
+    user: user.id,
+  });
 
-    return {
-        liked: !existingLike,
-        totalLikes: updatedPost?.totalLikes,
-    };
-}
+  if (existingLike) {
+    await Like.findByIdAndDelete(existingLike._id);
+  } else {
+    const likedBy = await User.findById({ _id: user.id });
+    await Like.create({
+      post: postId,
+      user: user.id,
+    });
+    await Notification.create({
+      receiver: post.author,
+      title: `${likedBy?.name} liked your post`,
+      seen: false,
+      path: `/forum/${postId}`,
+      refId: postId,
+      type: 'like',
+    });
+  }
 
+  const updatedPost = await Community.findByIdAndUpdate(
+    postId,
+    {
+      $inc: {
+        totalLikes: existingLike ? -1 : 1,
+      },
+    },
+    {
+      new: true,
+      select: 'totalLikes',
+    },
+  );
 
+  return {
+    liked: !existingLike,
+    totalLikes: updatedPost?.totalLikes,
+  };
+};
 
 const getAllLikeFromDB = async (query: Record<string, any>, id: string) => {
-    const qb = new QueryBuilder(Like.find({ post: id }), query).sort().populate(["user"], {
-        user: "name email"
-    })
-    const [result, meta] = await Promise.all([
-        qb.modelQuery.lean(),
-        qb.getPaginationInfo()
-    ])
-    return { result, meta }
-}
+  const qb = new QueryBuilder(Like.find({ post: id }), query)
+    .sort()
+    .populate(['user'], {
+      user: 'name email',
+    });
+  const [result, meta] = await Promise.all([
+    qb.modelQuery.lean(),
+    qb.getPaginationInfo(),
+  ]);
+  return { result, meta };
+};
 
+const getMyLikeFromDB = async (
+  user: JwtPayload,
+  query: Record<string, any>,
+) => {
+  const qb = new QueryBuilder(
+    Like.find({ user: user.id })
+      .populate('user', 'name email profile')
+      .populate({
+        path: 'post',
+        select: 'category content author totalLikes totalComments isLikeByMe',
+        populate: {
+          path: 'author',
+          select: 'name image role',
+        },
+      }),
+    query,
+  ).sort();
 
+  const [result, meta] = await Promise.all([
+    qb.modelQuery.lean(),
+    qb.getPaginationInfo(),
+  ]);
+  return { result, meta };
+};
 
-const getMyLikeFromDB = async (user: JwtPayload, query: Record<string, any>) => {
-    const qb = new QueryBuilder(
-        Like.find({ user: user.id })
-            .populate('user', 'name email profile')
-            .populate({
-                path: 'post',
-                select: 'category content author totalLikes totalComments',
-                populate: {
-                    path: 'author',
-                    select: 'name image role',
-                },
-            }),
-        query
-    ).sort()
-
-
-    const [result, meta] = await Promise.all([
-        qb.modelQuery.lean(),
-        qb.getPaginationInfo()
-    ])
-    return { result, meta }
-}
-
-
-export const LikeServices = { toggleLikeToDB, getMyLikeFromDB, getAllLikeFromDB };
+export const LikeServices = {
+  toggleLikeToDB,
+  getMyLikeFromDB,
+  getAllLikeFromDB,
+};

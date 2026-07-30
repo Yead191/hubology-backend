@@ -4,6 +4,7 @@ import { Membership } from '../membership/membership.model';
 import ApiError from '../../../errors/ApiError';
 import stripe from '../../../config/stripe';
 import config from '../../../config';
+import { Subscription } from './subscription.model';
 
 const subscribePackage = async (user: JwtPayload, packageId: string) => {
   const membership = await Membership.findOne({ _id: packageId });
@@ -36,6 +37,18 @@ const subscribePackage = async (user: JwtPayload, packageId: string) => {
   return subscriptionCheckoutSession.url;
 };
 
+const getMySubcription = async (user: JwtPayload) => {
+  const result = await Subscription.find({ user: user.id }).populate(
+    'user',
+    'name email',
+  );
+  if (!result.length) {
+    throw new ApiError(404, 'No subscription found!');
+  }
+  return result;
+};
+
 export const SubscriptionServices = {
   subscribePackage,
+  getMySubcription,
 };

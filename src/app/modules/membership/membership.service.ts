@@ -48,7 +48,7 @@ const createMembershipToDB = async (payload: IMembership) => {
     after_completion: {
       type: 'redirect',
       redirect: {
-        url: `${config.frontend_url}/membership`,
+        url: `${config.frontend_url}/payment/success?type=membership`,
       },
     },
   });

@@ -107,8 +107,8 @@ const createOrderToDb = async (user: JwtPayload, payload: OrderPayload) => {
     payment_method_types: ['card'],
     line_items,
     mode: 'payment',
-    success_url: `https://hubology-frontend.vercel.app/checkout?status=success`,
-    cancel_url: `https://hubology-frontend.vercel.app/checkout?status=failed`,
+    success_url: `${config.frontend_url}/payment/success?type=checkout`,
+    cancel_url: `${config.frontend_url}/payment/failed?type=checkout`,
     customer_email: user.email,
     metadata: {
       userId: user.id!,

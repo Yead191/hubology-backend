@@ -18,6 +18,19 @@ const subscribePackage = catchAsync(
   },
 );
 
+const getMySubcription = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const result = await SubscriptionServices.getMySubcription(req.user);
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: 'My Subcription retrieved successfully!',
+      data: result,
+    });
+  },
+);
+
 export const SubscriptionController = {
   subscribePackage,
+  getMySubcription,
 };

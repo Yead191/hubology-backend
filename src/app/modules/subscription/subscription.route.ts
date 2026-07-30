@@ -4,6 +4,8 @@ import auth from '../../middlewares/auth';
 
 const router = express.Router();
 
+router.route('/').get(auth(), SubscriptionController.getMySubcription);
+
 router.post('/subscribe/:id', auth(), SubscriptionController.subscribePackage);
 
 export const SubscriptionRoutes = router;
