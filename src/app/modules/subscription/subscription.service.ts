@@ -22,12 +22,18 @@ const subscribePackage = async (user: JwtPayload, packageId: string) => {
       },
     ],
     mode: 'subscription',
-    success_url: `${config.frontend_url}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${config.frontend_url}/payment-failed?session_id={CHECKOUT_SESSION_ID}`,
+    success_url: `${config.frontend_url}/payment/success?type=membership`,
+    cancel_url: `${config.frontend_url}/payment/failure?type=membership`,
     customer_email: user.email,
     metadata: {
       userId: user.id,
       membershipId: packageId,
+    },
+    subscription_data: {
+      metadata: {
+        userId: user.id,
+        membershipId: packageId,
+      },
     },
   });
 

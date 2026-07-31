@@ -55,12 +55,20 @@ const getAllNotifications = async (
     .paginate()
     .sort();
 
+  let unreadCount = await Notification.countDocuments({
+    receiver: user.id,
+    seen: false,
+  });
+
   const [notifications, pagination] = await Promise.all([
     notificationsQuery.modelQuery.lean(),
     notificationsQuery.getPaginationInfo(),
   ]);
 
-  return { notifications, pagination };
+  return {
+    data: { unreadCount, data: notifications },
+    pagination,
+  };
 };
 
 const getSingleNotification = async (id: string) => {

@@ -31,13 +31,17 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
           await handleServiceBooking(session);
         } else if (session?.metadata?.type === 'digital-shop') {
           await handleDigitalPurchase(session);
+        } else if (session.metadata?.membershipId) {
+          await handleMembershipCheckout(session);
         }
         break;
       case 'customer.subscription.created':
         const subscriptionCreatedSession = event.data
           .object as Stripe.Subscription;
         // console.log(subscriptionCreatedSession);
-        await handleMembershipCheckout(subscriptionCreatedSession);
+        if (subscriptionCreatedSession.metadata?.membershipId) {
+          await handleMembershipCheckout(subscriptionCreatedSession as any);
+        }
         break;
 
       default:

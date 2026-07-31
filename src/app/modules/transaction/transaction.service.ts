@@ -1,5 +1,4 @@
 import { JwtPayload } from 'jsonwebtoken';
-import { TransactionModel } from './transaction.interface';
 import { USER_ROLES } from '../../../enums/user';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { Transaction } from './transaction.model';

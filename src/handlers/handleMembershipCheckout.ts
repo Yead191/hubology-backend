@@ -15,7 +15,7 @@ import { emailHelper } from '../helpers/emailHelper';
 import { emailTemplate } from '../shared/emailTemplate';
 
 export const handleMembershipCheckout = async (
-  checkoutSession: Stripe.Subscription,
+  checkoutSession: Stripe.Checkout.Session | Stripe.Subscription | any,
 ) => {
   const mongoSession = await mongoose.startSession();
 
@@ -23,11 +23,32 @@ export const handleMembershipCheckout = async (
     mongoSession.startTransaction();
 
     const metadata = checkoutSession?.metadata || {};
+    // console.log(metadata);
     const membershipId = metadata?.membershipId;
     const userId = metadata?.userId;
     if (!metadata?.userId) {
       return;
     }
+    // prevent duplicate transaction Id
+    const stripeSubscriptionId =
+      typeof checkoutSession.subscription === 'string'
+        ? checkoutSession.subscription
+        : (checkoutSession as any).subscription?.id || checkoutSession.id;
+
+    // Check for existing transaction using session ID or subscription ID
+    const existingTransaction = await Transaction.findOne({
+      transaction_id: { $in: [checkoutSession.id, stripeSubscriptionId] },
+    }).session(mongoSession);
+
+    if (existingTransaction) {
+      console.log(
+        `[Membership Checkout] Transaction already processed for ID: ${checkoutSession.id} / ${stripeSubscriptionId}`,
+      );
+      await mongoSession.abortTransaction();
+      mongoSession.endSession();
+      return;
+    }
+
     // 1. Find User
     let user: any = null;
     if (userId && mongoose.Types.ObjectId.isValid(userId)) {
@@ -107,8 +128,8 @@ export const handleMembershipCheckout = async (
           end_date: endDate,
           price: membership.price,
           features: membership.features || [],
-          payment_intent_id: checkoutSession.id,
-          trxId: checkoutSession.id,
+          payment_intent_id: stripeSubscriptionId,
+          trxId: stripeSubscriptionId,
         },
       ],
       { session: mongoSession },
@@ -131,7 +152,7 @@ export const handleMembershipCheckout = async (
           status: TRANSACTION_STATUS.SUCCESS,
           type: TRANSACTION_TYPE.CREDIT,
           category: TRANSACTION_CATEGORY.MEMBERSHIP,
-          transaction_id: checkoutSession.id,
+          transaction_id: stripeSubscriptionId,
         },
       ],
       { session: mongoSession },
@@ -139,6 +160,9 @@ export const handleMembershipCheckout = async (
 
     await mongoSession.commitTransaction();
     mongoSession.endSession();
+    // console.log('==============================================');
+    // console.log('Membership activated successfully', user);
+    // console.log('==============================================');
 
     // 7. Send Notifications & Email
     try {
