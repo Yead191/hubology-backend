@@ -24,6 +24,8 @@ const toggleLikeToDB = async (user: JwtPayload, postId: string) => {
     user: user.id,
   });
 
+  const io = global.socketServer;
+
   if (existingLike) {
     await Like.findByIdAndDelete(existingLike._id);
   } else {
@@ -32,7 +34,7 @@ const toggleLikeToDB = async (user: JwtPayload, postId: string) => {
       post: postId,
       user: user.id,
     });
-    await Notification.create({
+    const notification = await Notification.create({
       receiver: post.author,
       title: `${likedBy?.name} liked your post`,
       seen: false,
@@ -40,6 +42,8 @@ const toggleLikeToDB = async (user: JwtPayload, postId: string) => {
       refId: postId,
       type: 'like',
     });
+
+    io?.emit(`getNotification::${post.author}`, notification);
   }
 
   const updatedPost = await Community.findByIdAndUpdate(

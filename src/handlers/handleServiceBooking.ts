@@ -99,7 +99,7 @@ export const handleServiceBooking = async (
         title: 'New Service Booked',
         message: `${user.name} booked ${serviceDetails?.title || 'a service'} ($${priceAmount}).`,
         refId: serviceDetails?._id!,
-        path: '/bookings',
+        path: '/dashboard/bookings',
       });
     } catch (notifErr) {
       console.error('Failed to send admin notification:', notifErr);

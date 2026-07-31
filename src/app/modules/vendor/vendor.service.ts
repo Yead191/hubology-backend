@@ -30,7 +30,12 @@ const getVendorsFromDB = async (
       .fields();
   } else {
     vendorQuery = new QueryBuilder(
-      User.find({ role: USER_ROLES.VENDOR, verified: true, status: 'active' }),
+      User.find({
+        role: USER_ROLES.VENDOR,
+        verified: true,
+        status: 'active',
+        subscription: { $ne: null },
+      }),
       query,
     )
       .paginate()

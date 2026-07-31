@@ -9,14 +9,13 @@ import { JwtPayload } from 'jsonwebtoken';
 import stripe from '../../../config/stripe';
 import config from '../../../config';
 import { Digital } from '../digital/digital.model';
-import { USER_ROLES } from '../../../enums/user';
 
 const createBook = async (data: IProduct) => {
   const result = await Product.create(data);
   sendNotificationToAllUsers({
     title: 'New Product Published',
     message: `${result.title} is now available for purchase!`,
-    path: `/book/${result._id}`,
+    path: `/${data?.type === 'digital' ? 'store' : 'office-supplies'}/${result._id}`,
   });
   return result;
 };

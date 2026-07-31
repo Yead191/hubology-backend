@@ -23,6 +23,8 @@ const createCommentToDB = async (
       'This post is removed by admin!',
     );
   }
+  const io = global.socketServer;
+
   const comment = {
     text: payload.text,
     post: postId,
@@ -31,7 +33,7 @@ const createCommentToDB = async (
   const result = await Comment.create(comment);
   if (result) {
     const commentedBy = await User.findById({ _id: user.id });
-    await Notification.create({
+    const notification = await Notification.create({
       receiver: post.author,
       title: `${commentedBy?.name} commented on your post`,
       seen: false,
@@ -39,6 +41,7 @@ const createCommentToDB = async (
       refId: postId,
       type: 'comment',
     });
+    io?.emit(`getNotification::${post.author}`, notification);
   }
   await Community.findByIdAndUpdate(postId, { $inc: { totalComments: 1 } });
   return result;
