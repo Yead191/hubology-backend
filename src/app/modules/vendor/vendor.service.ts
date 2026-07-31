@@ -20,7 +20,7 @@ const getVendorsFromDB = async (
     user?.role === USER_ROLES.SUPER_ADMIN
   ) {
     vendorQuery = new QueryBuilder(
-      User.find({ role: USER_ROLES.VENDOR }),
+      User.find({ role: USER_ROLES.VENDOR }).populate('subscription'),
       query,
     )
       .paginate()

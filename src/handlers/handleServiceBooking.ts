@@ -54,7 +54,7 @@ export const handleServiceBooking = async (
       user: user._id,
       service: serviceId!,
       paymentStatus: 'paid',
-      status: 'confirmed',
+      status: 'pending',
       paymentIntentId: paymentTxnId,
       price: priceAmount,
       note: metadata?.note || '',
