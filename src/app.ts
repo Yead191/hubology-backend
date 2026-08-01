@@ -61,6 +61,8 @@ app.use(
       'http://localhost:3000',
       'http://localhost:5173',
       'http://localhost:5174',
+      'http://31.97.103.122:4173',
+      'http://31.97.103.122:3000',
     ],
     credentials: true,
   }),
