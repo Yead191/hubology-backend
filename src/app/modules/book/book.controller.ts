@@ -17,17 +17,15 @@ const getAllBooks = catchAsync(async (req: Request, res: Response) => {
 });
 
 const createBook = catchAsync(async (req: Request, res: Response) => {
-  // console.log(req.body, 'control')
-  // console.log(req.files, 'files');
   let data = { ...req.body };
   const image = getSingleFilePath(req.files, 'image');
-  const doc = getSingleFilePath(req.files, 'doc');
+  const file = getSingleFilePath(req.files, 'file');
   // console.log(image);
   if (image) {
     data.image = image;
   }
-  if (doc) {
-    data.file = doc;
+  if (file) {
+    data.file = file;
   }
   if (req.body.accent) {
     data.accent =

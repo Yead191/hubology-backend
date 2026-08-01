@@ -11,7 +11,7 @@ router
   .get(BookController.getAllBooks)
   .post(
     auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
-    fileUploadHandler(),
+    fileUploadHandler([{ name: 'file', maxCount: 1 }]),
     BookController.createBook,
   );
 

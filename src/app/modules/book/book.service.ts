@@ -21,12 +21,6 @@ const createBook = async (data: IProduct) => {
 };
 
 const getAllBooks = async (query: Record<string, any>) => {
-  // const initQuery = [USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN].includes(
-  //   user.role,
-  // )
-  //   ? {}
-  //   : { 'details.status': 'in-stock' };
-
   const booksQuery = new QueryBuilder(Product.find(), query)
     .search(['title'])
     .filter()
