@@ -11,7 +11,7 @@ const membershipSchema = new Schema<IMembership, MembershipModel>(
       type: String,
       required: true,
       trim: true,
-      unique: true,
+      unique: false,
     },
     tagline: {
       type: String,
