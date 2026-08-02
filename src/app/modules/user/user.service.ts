@@ -194,6 +194,9 @@ const deleteUserService = async (id: string) => {
   if (!isExistUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
   }
+  if (isExistUser.image) {
+    unlinkFile(isExistUser.image);
+  }
   const result = await User.deleteOne({ _id: id });
   return result;
 };

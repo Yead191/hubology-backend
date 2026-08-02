@@ -21,6 +21,7 @@ import { OrderRoutes } from '../app/modules/order/order.route';
 import { SubscriptionRoutes } from '../app/modules/subscription/subscription.route';
 import { BookingsRoutes } from '../app/modules/bookings/bookings.route';
 import { DigitalRoutes } from '../app/modules/digital/digital.route';
+import { TestimonialRoutes } from '../app/modules/testimonial/testimonial.route';
 const router = express.Router();
 
 const apiRoutes = [
@@ -108,6 +109,10 @@ const apiRoutes = [
   {
     path: '/digital',
     route: DigitalRoutes,
+  },
+  {
+    path: '/testimonial',
+    route: TestimonialRoutes,
   },
 ];
 

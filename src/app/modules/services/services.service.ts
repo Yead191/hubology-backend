@@ -75,6 +75,9 @@ const deleteService = async (id: string) => {
   if (!isExistService) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Service doesn't exist!");
   }
+  if (isExistService?.image) {
+    unlinkFile(isExistService.image);
+  }
   const result = await Services.deleteOne({ _id: id });
   return result;
 };

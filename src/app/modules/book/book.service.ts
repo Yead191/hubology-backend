@@ -72,6 +72,12 @@ const deleteBook = async (id: string) => {
   if (!isExist) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Product not found');
   }
+  if (isExist.image) {
+    unlinkFile(isExist.image);
+  }
+  if (isExist.file) {
+    unlinkFile(isExist.file);
+  }
   const result = await Product.deleteOne({ _id: id });
   return result;
 };
