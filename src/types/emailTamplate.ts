@@ -100,3 +100,22 @@ export type IServiceBookingAdminNotification = {
   note?: string;
   transactionId?: string;
 };
+
+export type IInquiryUserConfirmation = {
+  name: string;
+  email: string;
+  projectDescription: string;
+  budget: string;
+  phone?: string;
+  company?: string;
+};
+
+export type IInquiryAdminNotification = {
+  adminEmail: string;
+  name: string;
+  email: string;
+  projectDescription: string;
+  budget: string;
+  phone?: string;
+  company?: string;
+};

@@ -14,6 +14,10 @@ import {
   serviceBookingUserConfirmation,
   serviceBookingAdminNotification,
 } from '../templates/serviceBookingTemplate';
+import {
+  inquiryUserConfirmation,
+  inquiryAdminNotification,
+} from '../templates/inquiryTemplate';
 
 export const emailTemplate = {
   createAccount,
@@ -27,4 +31,6 @@ export const emailTemplate = {
   vendorStatusUpdate,
   serviceBookingUserConfirmation,
   serviceBookingAdminNotification,
+  inquiryUserConfirmation,
+  inquiryAdminNotification,
 };
