@@ -27,6 +27,8 @@ export const handleMembershipCheckout = async (
     const membershipId = metadata?.membershipId;
     const userId = metadata?.userId;
     if (!metadata?.userId) {
+      await mongoSession.abortTransaction();
+      mongoSession.endSession();
       return;
     }
     // prevent duplicate transaction Id
@@ -72,20 +74,16 @@ export const handleMembershipCheckout = async (
 
     if (!membership) {
       // Fallback: List session line items to match priceId or productId
-      try {
-        const lineItems = await stripe.checkout.sessions.listLineItems(
-          checkoutSession.id,
-        );
-        const priceId = lineItems.data[0]?.price?.id;
-        const productId = lineItems.data[0]?.price?.product as string;
+      const lineItems = await stripe.checkout.sessions.listLineItems(
+        checkoutSession.id,
+      );
+      const priceId = lineItems.data[0]?.price?.id;
+      const productId = lineItems.data[0]?.price?.product as string;
 
-        if (priceId || productId) {
-          membership = await Membership.findOne({
-            $or: [{ priceId }, { productId }],
-          }).session(mongoSession);
-        }
-      } catch (err) {
-        console.error('Failed to list line items for session:', err);
+      if (priceId || productId) {
+        membership = await Membership.findOne({
+          $or: [{ priceId }, { productId }],
+        }).session(mongoSession);
       }
     }
 
@@ -158,55 +156,39 @@ export const handleMembershipCheckout = async (
       { session: mongoSession },
     );
 
-    await mongoSession.commitTransaction();
-    mongoSession.endSession();
-    // console.log('==============================================');
-    // console.log('Membership activated successfully', user);
-    // console.log('==============================================');
-
     // 7. Send Notifications & Email
-    try {
-      await NotificationServices.createNotification({
-        receiver: user._id,
-        title: 'Membership Activated',
-        message: `Your ${membership.name} membership plan is now active!`,
-        refId: subscription._id,
-        path: '/subscriptions',
-      });
-    } catch (notifErr) {
-      console.error('Failed to send user notification:', notifErr);
-    }
+    await NotificationServices.createNotification({
+      receiver: user._id,
+      title: 'Membership Activated',
+      message: `Your ${membership.name} membership plan is now active!`,
+      refId: subscription._id,
+      path: '/subscriptions',
+    });
 
-    try {
-      await NotificationServices.sendNotificationToAdmins({
-        title: 'New Membership Subscription',
-        message: `${user.name} subscribed to ${membership.name} ($${membership.price}).`,
-        refId: subscription._id,
-        path: '/subscriptions',
-      });
-    } catch (notifErr) {
-      console.error('Failed to send admin notification:', notifErr);
-    }
+    await NotificationServices.sendNotificationToAdmins({
+      title: 'New Membership Subscription',
+      message: `${user.name} subscribed to ${membership.name} ($${membership.price}).`,
+      refId: subscription._id,
+      path: '/subscriptions',
+    });
 
     if (user.email) {
-      try {
-        const emailData = emailTemplate.orderStatusUpdate({
-          email: user.email,
-          name: user.name || 'Member',
-          orderId: membership.name,
-          status: `Active (${membership.name})`,
-          totalPrice: membership.price,
-        });
-        await emailHelper.sendEmail(emailData);
-      } catch (emailErr) {
-        console.error(
-          'Failed to send subscription confirmation email:',
-          emailErr,
-        );
-      }
+      const emailData = emailTemplate.orderStatusUpdate({
+        email: user.email,
+        name: user.name || 'Member',
+        orderId: membership.name,
+        status: `Active (${membership.name})`,
+        totalPrice: membership.price,
+      });
+      await emailHelper.sendEmail(emailData);
     }
+
+    await mongoSession.commitTransaction();
+    mongoSession.endSession();
   } catch (error) {
-    mongoSession.abortTransaction();
+    if (mongoSession.inTransaction()) {
+      await mongoSession.abortTransaction();
+    }
     mongoSession.endSession();
     console.error('[Membership Checkout Error]:', error);
   }
