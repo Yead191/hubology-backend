@@ -43,6 +43,7 @@ const bookingServiceIntoDB = async (user: JwtPayload, payload: IBookings) => {
       preferredDate: String(payload.preferredDate),
       preferredTime: payload.preferredTime,
       note: payload.note || '',
+      phone: payload.phone || '',
     },
   });
   if (!session.url) {

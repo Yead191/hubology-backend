@@ -18,6 +18,11 @@ const bookingsSchema = new Schema<IBookings, BookingsModel>(
       type: Date,
       required: true,
     },
+    phone: {
+      type: String,
+      required: false,
+      trim: true,
+    },
 
     preferredTime: {
       type: String,

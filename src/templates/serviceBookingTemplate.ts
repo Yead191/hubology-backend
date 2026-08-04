@@ -65,6 +65,16 @@ export const serviceBookingUserConfirmation = (
                     <td style="font-weight: bold; color: #173616; border-bottom: 1px solid #f3f4f6;">$${values.price.toFixed(2)}</td>
                   </tr>
                   ${
+                    values.phone
+                      ? `
+                  <tr>
+                    <td style="font-weight: bold; border-bottom: 1px solid #f3f4f6;">Contact Number:</td>
+                    <td style="border-bottom: 1px solid #f3f4f6;">${values.phone}</td>
+                  </tr>
+                  `
+                      : ''
+                  }
+                  ${
                     values.preferredDate
                       ? `
                   <tr>
@@ -181,6 +191,16 @@ export const serviceBookingAdminNotification = (
                     <td style="font-weight: bold; border-bottom: 1px solid #f3f4f6;">Amount Paid:</td>
                     <td style="font-weight: bold; color: #173616; border-bottom: 1px solid #f3f4f6;">$${values.price.toFixed(2)}</td>
                   </tr>
+                  ${
+                    values.phone
+                      ? `
+                  <tr>
+                    <td style="font-weight: bold; border-bottom: 1px solid #f3f4f6;">Contact Number:</td>
+                    <td style="border-bottom: 1px solid #f3f4f6;">${values.phone}</td>
+                  </tr>
+                  `
+                      : ''
+                  }
                   ${
                     values.preferredDate
                       ? `

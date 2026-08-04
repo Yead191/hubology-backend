@@ -28,6 +28,8 @@ export const handleServiceBooking = async (
     const userId = metadata?.userId;
 
     if (!userId) {
+      await mongoSession.abortTransaction();
+      mongoSession.endSession();
       return;
     }
 
@@ -58,6 +60,7 @@ export const handleServiceBooking = async (
       paymentIntentId: paymentTxnId,
       price: priceAmount,
       note: metadata?.note || '',
+      phone: metadata?.phone || '',
       preferredDate: metadata?.preferredDate || '',
       preferredTime: metadata?.preferredTime || '',
     });
@@ -78,88 +81,71 @@ export const handleServiceBooking = async (
       { session: mongoSession },
     );
 
-    await mongoSession.commitTransaction();
-    mongoSession.endSession();
-
     // 4. Send In-App Notifications
-    try {
-      await NotificationServices.createNotification({
-        receiver: user._id,
-        title: 'Service Booked',
-        message: `Your ${serviceDetails?.title || 'service'} booking is now confirmed!`,
-        refId: serviceDetails?._id!,
-        path: '/bookings',
-      });
-    } catch (notifErr) {
-      console.error('Failed to send user notification:', notifErr);
-    }
+    await NotificationServices.createNotification({
+      receiver: user._id,
+      title: 'Service Booked',
+      message: `Your ${serviceDetails?.title || 'service'} booking is now confirmed!`,
+      refId: serviceDetails?._id!,
+      path: '/bookings',
+    });
 
-    try {
-      await NotificationServices.sendNotificationToAdmins({
-        title: 'New Service Booked',
-        message: `${user.name} booked ${serviceDetails?.title || 'a service'} ($${priceAmount}).`,
-        refId: serviceDetails?._id!,
-        path: '/dashboard/bookings',
-      });
-    } catch (notifErr) {
-      console.error('Failed to send admin notification:', notifErr);
-    }
+    await NotificationServices.sendNotificationToAdmins({
+      title: 'New Service Booked',
+      message: `${user.name} booked ${serviceDetails?.title || 'a service'} ($${priceAmount}).`,
+      refId: serviceDetails?._id!,
+      path: '/dashboard/bookings',
+    });
 
     // 5. Send Email to User
     if (user.email) {
-      try {
-        const userEmailData = emailTemplate.serviceBookingUserConfirmation({
-          email: user.email,
-          name: user.name || 'Customer',
-          serviceTitle: serviceDetails?.title || 'Service',
-          price: priceAmount,
-          preferredDate: metadata?.preferredDate || '',
-          preferredTime: metadata?.preferredTime || '',
-          note: metadata?.note || '',
-          transactionId: paymentTxnId,
-        });
-        await emailHelper.sendEmail(userEmailData);
-      } catch (emailErr) {
-        console.error('Failed to send user service booking email:', emailErr);
-      }
+      const userEmailData = emailTemplate.serviceBookingUserConfirmation({
+        email: user.email,
+        name: user.name || 'Customer',
+        serviceTitle: serviceDetails?.title || 'Service',
+        price: priceAmount,
+        phone: metadata?.phone || user?.phone || '',
+        preferredDate: metadata?.preferredDate || '',
+        preferredTime: metadata?.preferredTime || '',
+        note: metadata?.note || '',
+        transactionId: paymentTxnId,
+      });
+      await emailHelper.sendEmail(userEmailData);
     }
 
     // 6. Send Email to Super Admin & Admins
-    try {
-      const admins = await User.find({
-        $or: [{ role: USER_ROLES.ADMIN }, { role: USER_ROLES.SUPER_ADMIN }],
+    const admins = await User.find({
+      $or: [{ role: USER_ROLES.ADMIN }, { role: USER_ROLES.SUPER_ADMIN }],
+    });
+
+    const adminEmails = Array.from(
+      new Set(
+        [...admins.map(a => a.email), config.super_admin.email].filter(Boolean),
+      ),
+    );
+
+    for (const adminEmail of adminEmails) {
+      const adminEmailData = emailTemplate.serviceBookingAdminNotification({
+        adminEmail: adminEmail as string,
+        customerName: user.name || 'Customer',
+        customerEmail: user.email || 'N/A',
+        serviceTitle: serviceDetails?.title || 'Service',
+        price: priceAmount,
+        phone: metadata?.phone || user?.phone || '',
+        preferredDate: metadata?.preferredDate || '',
+        preferredTime: metadata?.preferredTime || '',
+        note: metadata?.note || '',
+        transactionId: paymentTxnId,
       });
-
-      const adminEmails = Array.from(
-        new Set(
-          [...admins.map(a => a.email), config.super_admin.email].filter(
-            Boolean,
-          ),
-        ),
-      );
-
-      for (const adminEmail of adminEmails) {
-        const adminEmailData = emailTemplate.serviceBookingAdminNotification({
-          adminEmail: adminEmail as string,
-          customerName: user.name || 'Customer',
-          customerEmail: user.email || 'N/A',
-          serviceTitle: serviceDetails?.title || 'Service',
-          price: priceAmount,
-          preferredDate: metadata?.preferredDate || '',
-          preferredTime: metadata?.preferredTime || '',
-          note: metadata?.note || '',
-          transactionId: paymentTxnId,
-        });
-        await emailHelper.sendEmail(adminEmailData);
-      }
-    } catch (emailErr) {
-      console.error(
-        'Failed to send admin service booking notification email:',
-        emailErr,
-      );
+      await emailHelper.sendEmail(adminEmailData);
     }
+
+    await mongoSession.commitTransaction();
+    mongoSession.endSession();
   } catch (error) {
-    mongoSession.abortTransaction();
+    if (mongoSession.inTransaction()) {
+      await mongoSession.abortTransaction();
+    }
     mongoSession.endSession();
     console.error('[Service Booking Error]:', error);
   }

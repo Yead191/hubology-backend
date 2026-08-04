@@ -6,7 +6,7 @@ export type IBookings = {
   user: Types.ObjectId;
   preferredDate: Date;
   preferredTime: string;
-
+  phone?: string;
   note?: string;
 
   price: number;

@@ -83,6 +83,7 @@ export type IServiceBookingUserConfirmation = {
   name: string;
   serviceTitle: string;
   price: number;
+  phone?: string;
   preferredDate?: string;
   preferredTime?: string;
   note?: string;
@@ -95,6 +96,7 @@ export type IServiceBookingAdminNotification = {
   customerEmail: string;
   serviceTitle: string;
   price: number;
+  phone?: string;
   preferredDate?: string;
   preferredTime?: string;
   note?: string;
