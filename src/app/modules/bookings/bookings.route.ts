@@ -2,6 +2,8 @@ import express from 'express';
 import { BookingsController } from './bookings.controller';
 import auth from '../../middlewares/auth';
 import { USER_ROLES } from '../../../enums/user';
+import validateRequest from '../../middlewares/validateRequest';
+import { BookingsValidations } from './bookings.validation';
 
 const router = express.Router();
 
@@ -9,6 +11,7 @@ router
   .route('/')
   .post(
     auth(USER_ROLES.USER, USER_ROLES.VENDOR),
+    validateRequest(BookingsValidations.createBookingZod),
     BookingsController.createBooking,
   )
   .get(auth(), BookingsController.getAllBookings);
