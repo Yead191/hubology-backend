@@ -23,6 +23,7 @@ import { BookingsRoutes } from '../app/modules/bookings/bookings.route';
 import { DigitalRoutes } from '../app/modules/digital/digital.route';
 import { TestimonialRoutes } from '../app/modules/testimonial/testimonial.route';
 import { InquiryRoutes } from '../app/modules/inquiry/inquiry.route';
+import { DisclaimerRoutes } from '../app/modules/disclaimer/disclaimer.route';
 const router = express.Router();
 
 const apiRoutes = [
@@ -118,6 +119,10 @@ const apiRoutes = [
   {
     path: '/inquiry',
     route: InquiryRoutes,
+  },
+  {
+    path: '/disclaimer',
+    route: DisclaimerRoutes,
   },
 ];
 
