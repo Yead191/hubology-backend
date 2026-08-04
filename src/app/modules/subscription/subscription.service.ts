@@ -1,17 +1,24 @@
 import { JwtPayload } from 'jsonwebtoken';
-import { SubscriptionModel } from './subscription.interface';
 import { Membership } from '../membership/membership.model';
 import ApiError from '../../../errors/ApiError';
 import stripe from '../../../config/stripe';
 import config from '../../../config';
 import { Subscription } from './subscription.model';
 import QueryBuilder from '../../builder/QueryBuilder';
+import { StatusCodes } from 'http-status-codes';
 
 const subscribePackage = async (user: JwtPayload, packageId: string) => {
   const membership = await Membership.findOne({ _id: packageId });
 
   if (!membership) {
-    throw new ApiError(404, 'Membership not found');
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Membership not found');
+  }
+
+  if (membership.type !== user.role.toLowerCase()) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      `You are ${user.role}, can't subscribe ${membership.type} membership.`,
+    );
   }
 
   const subscriptionCheckoutSession = await stripe.checkout.sessions.create({
@@ -38,7 +45,10 @@ const subscribePackage = async (user: JwtPayload, packageId: string) => {
   });
 
   if (!subscriptionCheckoutSession.url) {
-    throw new ApiError(500, 'Failed to create subscription checkout session');
+    throw new ApiError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      'Failed to create subscription checkout session',
+    );
   }
 
   return subscriptionCheckoutSession.url;
@@ -50,7 +60,7 @@ const getMySubcription = async (user: JwtPayload) => {
     'name email',
   );
   if (!result.length) {
-    throw new ApiError(404, 'No subscription found!');
+    throw new ApiError(StatusCodes.NOT_FOUND, 'No subscription found!');
   }
   return result;
 };
