@@ -1,4 +1,8 @@
-import { createAccount, resetPassword } from '../templates/authTemplate';
+import {
+  createAccount,
+  resetPassword,
+  welcomeAccount,
+} from '../templates/authTemplate';
 import { applicationStatusUpdate } from '../templates/applicationTemplate';
 import {
   donationReceipt,
@@ -22,6 +26,7 @@ import {
 export const emailTemplate = {
   createAccount,
   resetPassword,
+  welcomeAccount,
   applicationStatusUpdate,
   donationReceipt,
   donationReceived,

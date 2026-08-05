@@ -145,6 +145,13 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
       { verified: true, authentication: { oneTimeCode: null, expireAt: null } },
     );
     message = 'Email verified successfully';
+
+    // Send Welcome Email
+    const welcomeEmailData = emailTemplate.welcomeAccount({
+      email: isExistUser.email,
+      name: isExistUser.name || 'User',
+    });
+    await emailHelper.sendEmail(welcomeEmailData);
   } else {
     await User.findOneAndUpdate(
       { _id: isExistUser._id },

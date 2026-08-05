@@ -51,7 +51,7 @@ export const vendorStatusUpdate = (values: IVendorStatusUpdate) => {
         <table width="100%" max-width="600" border="0" cellspacing="0" cellpadding="0" style="width: 100%; max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin: 30px auto;">
           <!-- Header/Logo Section -->
           <tr>
-            <td align="center" style="background-color: #173616; padding: 35px 20px; border-bottom: 4px solid #bba15c;">
+            <td align="center" style="background-color: #0D1026; padding: 35px 20px; border-bottom: 4px solid #bba15c;">
               <img src="${logoUrl}" alt="Hubology Logo" style="display: block; width: 180px; height: auto;" />
             </td>
           </tr>

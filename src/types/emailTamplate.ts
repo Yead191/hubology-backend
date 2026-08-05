@@ -121,3 +121,8 @@ export type IInquiryAdminNotification = {
   phone?: string;
   company?: string;
 };
+
+export type IWelcomeAccount = {
+  name: string;
+  email: string;
+};
