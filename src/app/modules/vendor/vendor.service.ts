@@ -8,6 +8,7 @@ import { StatusCodes } from 'http-status-codes';
 import { IUser } from '../user/user.interface';
 import { emailHelper } from '../../../helpers/emailHelper';
 import { emailTemplate } from '../../../shared/emailTemplate';
+import unlinkFile from '../../../shared/unlinkFile';
 
 const getVendorsFromDB = async (
   user: JwtPayload,
@@ -132,8 +133,21 @@ const changeVendorStatus = async (id: string, payload: Pick<IUser, any>) => {
   return result;
 };
 
+const deleteVendorService = async (id: string) => {
+  const isExistVendor = await User.findById(id);
+  if (!isExistVendor) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Vendor doesn't exist!");
+  }
+  if (isExistVendor.image) {
+    unlinkFile(isExistVendor.image);
+  }
+  const result = await User.deleteOne({ _id: id });
+  return result;
+};
+
 export const VendorService = {
   getVendorsFromDB,
   getSingleVendorFromDB,
   changeVendorStatus,
+  deleteVendorService,
 };

@@ -6,7 +6,13 @@ import tempAuth from '../../middlewares/tempAuth';
 const router = express.Router();
 
 router.route('/').get(tempAuth(), VendorController.getAllVendors);
-router.route('/:id').get(VendorController.getSingleVendor);
+router
+  .route('/:id')
+  .get(VendorController.getSingleVendor)
+  .delete(
+    auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+    VendorController.deleteVendor,
+  );
 router
   .route('/change-status/:id')
   .patch(
