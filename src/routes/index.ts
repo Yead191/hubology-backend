@@ -24,6 +24,7 @@ import { DigitalRoutes } from '../app/modules/digital/digital.route';
 import { TestimonialRoutes } from '../app/modules/testimonial/testimonial.route';
 import { InquiryRoutes } from '../app/modules/inquiry/inquiry.route';
 import { DisclaimerRoutes } from '../app/modules/disclaimer/disclaimer.route';
+import { FaqRoutes } from '../app/modules/faq/faq.route';
 const router = express.Router();
 
 const apiRoutes = [
@@ -123,6 +124,10 @@ const apiRoutes = [
   {
     path: '/disclaimer',
     route: DisclaimerRoutes,
+  },
+  {
+    path: '/faq',
+    route: FaqRoutes,
   },
 ];
 
