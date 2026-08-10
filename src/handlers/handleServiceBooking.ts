@@ -87,14 +87,14 @@ export const handleServiceBooking = async (
       title: 'Service Booked',
       message: `Your ${serviceDetails?.title || 'service'} booking is now confirmed!`,
       refId: serviceDetails?._id!,
-      path: '/bookings',
+      path: '/dashboard/bookings',
     });
 
     await NotificationServices.sendNotificationToAdmins({
       title: 'New Service Booked',
       message: `${user.name} booked ${serviceDetails?.title || 'a service'} ($${priceAmount}).`,
       refId: serviceDetails?._id!,
-      path: '/dashboard/bookings',
+      path: '/services/bookings',
     });
 
     // 5. Send Email to User

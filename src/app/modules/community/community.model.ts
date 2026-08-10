@@ -1,5 +1,9 @@
 import { Schema, model } from 'mongoose';
-import { ICommunity, CommunityModel } from './community.interface';
+import {
+  ICommunity,
+  CommunityModel,
+} from './community.interface';
+import { COMMUNITY_CATEGORY } from './community.constants';
 
 const communitySchema = new Schema<ICommunity, CommunityModel>(
   {
@@ -10,6 +14,7 @@ const communitySchema = new Schema<ICommunity, CommunityModel>(
     },
     category: {
       type: String,
+      enum: COMMUNITY_CATEGORY,
       required: true,
       trim: true,
     },

@@ -1,9 +1,12 @@
 import { Model, Types } from 'mongoose';
+import { COMMUNITY_CATEGORY } from './community.constants';
+
+export type CommunityCategory = (typeof COMMUNITY_CATEGORY)[number];
 
 export type ICommunity = {
   // Define the interface for Community here
   author: Types.ObjectId;
-  category: string;
+  category: CommunityCategory;
   content: string;
   image?: string;
   totalLikes: number;

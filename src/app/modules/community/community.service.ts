@@ -40,7 +40,7 @@ const getAllPostsFromDB = async (
     user?.role === USER_ROLES.ADMIN
   ) {
     postsQuery = new QueryBuilder(Community.find(), query)
-      .search(['title', 'category'])
+      .search(['content', 'category'])
       .filter()
       .sort()
       .paginate()
@@ -53,7 +53,7 @@ const getAllPostsFromDB = async (
       Community.find({ status: { $nin: 'removed' } }),
       query,
     )
-      .search(['title', 'category'])
+      .search(['content', 'category'])
       .filter()
       .sort()
       .paginate()
@@ -155,7 +155,7 @@ const getMyPosts = async (user: JwtPayload, query: Record<string, any>) => {
     Community.find({ author: user.id }),
     query,
   )
-    .search(['title', 'category'])
+    .search(['content', 'category'])
     .filter()
     .sort()
     .paginate()
