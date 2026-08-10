@@ -80,7 +80,7 @@ export const handleOrderPurchase = async (
           title: 'Order Placed Successfully',
           message: `Your order #${orderDetails.order_id} has been placed successfully.`,
           refId: orderDetails._id,
-          path: '/orders',
+          path: '/dashboard/orders',
         });
       } catch (notifErr) {
         console.error('Failed to create user notification:', notifErr);
@@ -93,7 +93,7 @@ export const handleOrderPurchase = async (
         title: 'New Order Received',
         message: `A new order #${orderDetails.order_id} was placed by ${customerName}.`,
         refId: orderDetails._id,
-        path: '/orders',
+        path: '/store/orders',
       });
     } catch (notifErr) {
       console.error('Failed to send admin notification:', notifErr);

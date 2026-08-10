@@ -162,14 +162,14 @@ export const handleMembershipCheckout = async (
       title: 'Membership Activated',
       message: `Your ${membership.name} membership plan is now active!`,
       refId: subscription._id,
-      path: '/subscriptions',
+      path: '/dashboard/subscriptions',
     });
 
     await NotificationServices.sendNotificationToAdmins({
       title: 'New Membership Subscription',
       message: `${user.name} subscribed to ${membership.name} ($${membership.price}).`,
       refId: subscription._id,
-      path: '/subscriptions',
+      path: `/membership/${membership?._id?.toString()}/subscribers`,
     });
 
     if (user.email) {
