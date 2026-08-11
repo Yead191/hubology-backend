@@ -9,6 +9,9 @@ export type ISubscription = {
   start_date: Date;
   recuring?: 'Free' | 'Monthly' | 'Yearly';
   end_date: Date;
+  trial_period_days?: number;
+  is_trial?: boolean;
+  trial_end_date?: Date;
   price: number;
   features: string[];
   payment_intent_id?: string;

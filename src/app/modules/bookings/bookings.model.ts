@@ -36,6 +36,31 @@ const bookingsSchema = new Schema<IBookings, BookingsModel>(
       required: true,
     },
 
+    updatedPrice: {
+      type: Number,
+      default: 0,
+    },
+
+    coupon: {
+      type: String,
+      default: '',
+    },
+
+    discountType: {
+      type: String,
+      enum: ['percentage', 'fixed'],
+    },
+
+    discountAmount: {
+      type: Number,
+      default: 0,
+    },
+
+    discountPercentage: {
+      type: Number,
+      default: 0,
+    },
+
     status: {
       type: String,
       enum: ['pending', 'confirmed', 'completed', 'cancelled'],

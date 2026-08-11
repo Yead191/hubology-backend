@@ -50,6 +50,17 @@ const subscriptionSchema = new Schema<ISubscription, SubscriptionModel>(
       type: String,
       default: '',
     },
+    is_trial: {
+      type: Boolean,
+      default: false,
+    },
+    trial_period_days: {
+      type: Number,
+      default: 0,
+    },
+    trial_end_date: {
+      type: Date,
+    },
   },
   { timestamps: true },
 );

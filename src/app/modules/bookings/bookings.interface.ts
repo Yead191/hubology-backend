@@ -10,12 +10,18 @@ export type IBookings = {
   note?: string;
 
   price: number;
+  updatedPrice?: number;
+
+  discountType?: 'percentage' | 'fixed';
+  discountAmount?: number;
+  discountPercentage?: number;
 
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
 
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
 
   paymentIntentId?: string;
+  coupon?: string;
 
   createdAt?: string;
   updatedAt?: string;

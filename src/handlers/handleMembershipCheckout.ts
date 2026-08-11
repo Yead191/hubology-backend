@@ -128,6 +128,14 @@ export const handleMembershipCheckout = async (
           features: membership.features || [],
           payment_intent_id: stripeSubscriptionId,
           trxId: stripeSubscriptionId,
+          is_trial: membership?.trial_period_days > 0,
+          trial_period_days: membership?.trial_period_days || 0,
+          trial_end_date: membership?.trial_period_days
+            ? new Date(
+                startDate.getTime() +
+                  membership.trial_period_days * 24 * 60 * 60 * 1000,
+              )
+            : undefined,
         },
       ],
       { session: mongoSession },

@@ -60,6 +60,26 @@ export const serviceBookingUserConfirmation = (
                     <td style="font-weight: bold; width: 40%; border-bottom: 1px solid #f3f4f6;">Service:</td>
                     <td style="font-weight: bold; color: #173616; border-bottom: 1px solid #f3f4f6;">${values.serviceTitle}</td>
                   </tr>
+                  ${
+                    values.originalPrice && values.originalPrice > values.price
+                      ? `
+                  <tr>
+                    <td style="font-weight: bold; border-bottom: 1px solid #f3f4f6;">Original Price:</td>
+                    <td style="border-bottom: 1px solid #f3f4f6;">$${values.originalPrice.toFixed(2)}</td>
+                  </tr>
+                  `
+                      : ''
+                  }
+                  ${
+                    values.couponCode || values.discountAmount
+                      ? `
+                  <tr>
+                    <td style="font-weight: bold; border-bottom: 1px solid #f3f4f6;">Discount${values.couponCode ? ` (${values.couponCode})` : ''}:</td>
+                    <td style="color: #dc2626; font-weight: bold; border-bottom: 1px solid #f3f4f6;">-${values.discountAmount ? `$${values.discountAmount.toFixed(2)}` : 'Applied'}</td>
+                  </tr>
+                  `
+                      : ''
+                  }
                   <tr>
                     <td style="font-weight: bold; border-bottom: 1px solid #f3f4f6;">Amount Paid:</td>
                     <td style="font-weight: bold; color: #173616; border-bottom: 1px solid #f3f4f6;">$${values.price.toFixed(2)}</td>
@@ -187,6 +207,26 @@ export const serviceBookingAdminNotification = (
                     <td style="font-weight: bold; border-bottom: 1px solid #f3f4f6;">Service:</td>
                     <td style="font-weight: bold; color: #173616; border-bottom: 1px solid #f3f4f6;">${values.serviceTitle}</td>
                   </tr>
+                  ${
+                    values.originalPrice && values.originalPrice > values.price
+                      ? `
+                  <tr>
+                    <td style="font-weight: bold; border-bottom: 1px solid #f3f4f6;">Original Price:</td>
+                    <td style="border-bottom: 1px solid #f3f4f6;">$${values.originalPrice.toFixed(2)}</td>
+                  </tr>
+                  `
+                      : ''
+                  }
+                  ${
+                    values.couponCode || values.discountAmount
+                      ? `
+                  <tr>
+                    <td style="font-weight: bold; border-bottom: 1px solid #f3f4f6;">Discount${values.couponCode ? ` (${values.couponCode})` : ''}:</td>
+                    <td style="color: #dc2626; font-weight: bold; border-bottom: 1px solid #f3f4f6;">-${values.discountAmount ? `$${values.discountAmount.toFixed(2)}` : 'Applied'}</td>
+                  </tr>
+                  `
+                      : ''
+                  }
                   <tr>
                     <td style="font-weight: bold; border-bottom: 1px solid #f3f4f6;">Amount Paid:</td>
                     <td style="font-weight: bold; color: #173616; border-bottom: 1px solid #f3f4f6;">$${values.price.toFixed(2)}</td>

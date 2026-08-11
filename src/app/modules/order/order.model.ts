@@ -71,6 +71,10 @@ const orderSchema = new Schema<IOrder, OrderModel>(
       type: Number,
       default: 0,
     },
+    coupon: {
+      type: String,
+      default: '',
+    },
   },
   { timestamps: true },
 );

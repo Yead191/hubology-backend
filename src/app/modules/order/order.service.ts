@@ -1,5 +1,5 @@
 import { JwtPayload } from 'jsonwebtoken';
-import { OrderModel, OrderPayload } from './order.interface';
+import { OrderPayload } from './order.interface';
 import { Cart } from '../cart/cart.model';
 import ApiError from '../../../errors/ApiError';
 import { StatusCodes } from 'http-status-codes';
@@ -14,6 +14,7 @@ import { NotificationServices } from '../notification/notification.service';
 import { emailHelper } from '../../../helpers/emailHelper';
 import { emailTemplate } from '../../../shared/emailTemplate';
 import { logger } from '../../../shared/logger';
+import { Coupon } from '../coupon/coupon.model';
 
 const createOrderToDb = async (user: JwtPayload, payload: OrderPayload) => {
   const myCart = await Cart.find({ user: user.id })
@@ -25,6 +26,15 @@ const createOrderToDb = async (user: JwtPayload, payload: OrderPayload) => {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Cart is empty');
   }
   const price_breakdown = CartHelper.calculateThePrice(myCart);
+
+  let coupon = null;
+  if (payload?.coupon) {
+    coupon = await Coupon.checkCoupon(
+      payload.coupon,
+      user.id,
+      price_breakdown.total_price,
+    );
+  }
 
   const items = myCart.map((item: any) => ({
     title: item.product.title,
@@ -43,6 +53,7 @@ const createOrderToDb = async (user: JwtPayload, payload: OrderPayload) => {
     address_breakdown: payload,
     contact_number: payload.contact_number,
     total_items: items.length,
+    coupon: payload.coupon || '',
   };
   const line_items = myCart.map((item: any) => ({
     price_data: {
@@ -53,7 +64,7 @@ const createOrderToDb = async (user: JwtPayload, payload: OrderPayload) => {
           `http://${config.ip_address}:${config.port}/files/${item.product.image}`,
         ],
       },
-      unit_amount: item.unit_price * 100,
+      unit_amount: Math.round(item.unit_price * 100),
     },
     quantity: item.quantity,
   }));
@@ -65,7 +76,7 @@ const createOrderToDb = async (user: JwtPayload, payload: OrderPayload) => {
           name: 'Delivery Charge',
           images: [],
         },
-        unit_amount: price_breakdown.delivery_charge * 100,
+        unit_amount: Math.round(price_breakdown.delivery_charge * 100),
       },
       quantity: 1,
     });
@@ -78,7 +89,7 @@ const createOrderToDb = async (user: JwtPayload, payload: OrderPayload) => {
           name: 'Service Fee',
           images: [],
         },
-        unit_amount: price_breakdown.serviceFee * 100,
+        unit_amount: Math.round(price_breakdown.serviceFee * 100),
       },
       quantity: 1,
     });
@@ -92,7 +103,7 @@ const createOrderToDb = async (user: JwtPayload, payload: OrderPayload) => {
           name: 'Tax',
           images: [],
         },
-        unit_amount: price_breakdown.tax * 100,
+        unit_amount: Math.round(price_breakdown.tax * 100),
       },
       quantity: 1,
     });
@@ -113,7 +124,17 @@ const createOrderToDb = async (user: JwtPayload, payload: OrderPayload) => {
     metadata: {
       userId: user.id!,
       orderId: createOrder._id.toString()!,
+      coupon: payload.coupon || '',
     },
+    ...(payload.coupon
+      ? {
+          discounts: [
+            {
+              coupon: coupon?.stripe_coupon_code,
+            },
+          ],
+        }
+      : {}),
   });
   if (!session.url) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Order not created!');
@@ -144,6 +165,7 @@ const getOrdersFromDB = async (
       'transaction_id',
       'contact_number',
       'payment_intent_id',
+      'coupon',
     ])
     .filter()
     .paginate()

@@ -8,12 +8,23 @@ import config from '../../../config';
 import { USER_ROLES } from '../../../enums/user';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { Bookings } from './bookings.model';
+import { Coupon } from '../coupon/coupon.model';
 
 const bookingServiceIntoDB = async (user: JwtPayload, payload: IBookings) => {
   payload.user = user.id;
   const service = await Services.findById(payload.service).lean();
   if (!service) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Service not found!');
+  }
+
+  let coupon = null;
+
+  if (payload.coupon) {
+    coupon = await Coupon.checkCoupon(
+      payload.coupon,
+      user.id,
+      service.price.amount,
+    );
   }
 
   const line_items = [
@@ -44,7 +55,17 @@ const bookingServiceIntoDB = async (user: JwtPayload, payload: IBookings) => {
       preferredTime: payload.preferredTime,
       note: payload.note || '',
       phone: payload.phone || '',
+      coupon: payload.coupon || '',
     },
+    ...(payload.coupon
+      ? {
+          discounts: [
+            {
+              coupon: coupon?.stripe_coupon_code,
+            },
+          ],
+        }
+      : {}),
   });
   if (!session.url) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Booking not created!');
@@ -82,7 +103,7 @@ const getAllBookings = async (user: JwtPayload, query: Record<string, any>) => {
       }),
     query,
   )
-    .search(['user.name', 'service.title', 'paymentIntentId'])
+    .search(['user.name', 'service.title', 'paymentIntentId', 'coupon'])
     .filter(['startDate', 'endDate'])
     .paginate()
     .sort()

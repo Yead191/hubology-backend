@@ -18,6 +18,7 @@ export type IOrder = {
   transaction_id?: string;
   discount_percentage?: number;
   discount_amount?: number;
+  coupon?: string;
 
   price_breakdown: {
     subtotal: number;
@@ -47,4 +48,5 @@ export type OrderPayload = {
   postal_code?: string;
   street_address?: string;
   contact_number: string;
+  coupon?: string;
 };

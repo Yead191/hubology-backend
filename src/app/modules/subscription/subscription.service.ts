@@ -41,6 +41,7 @@ const subscribePackage = async (user: JwtPayload, packageId: string) => {
         userId: user.id,
         membershipId: packageId,
       },
+      trial_period_days: membership.trial_period_days,
     },
   });
 

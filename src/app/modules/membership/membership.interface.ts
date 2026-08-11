@@ -21,7 +21,7 @@ export type IMembership = {
   highlight?: string;
 
   features: string[];
-
+  trial_period_days?: number;
   priceId: string;
   productId: string;
   paymentUrl: string;

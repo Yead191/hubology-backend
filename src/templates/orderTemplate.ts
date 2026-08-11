@@ -120,9 +120,63 @@ export const orderConfirmation = (values: IOrderConfirmation) => {
               </table>
 
               <!-- Total Box -->
-              <div style="background-color: #f3f4f6; border-radius: 8px; padding: 16px; text-align: right; margin-bottom: 24px;">
-                <span style="font-size: 15px; color: #4b5563; font-weight: 600;">Total Amount Paid: </span>
-                <span style="font-size: 20px; color: #173616; font-weight: bold; margin-left: 8px;">$${values.totalPrice.toFixed(2)}</span>
+              <div style="background-color: #f3f4f6; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                <table width="100%" border="0" cellspacing="0" cellpadding="4" style="font-size: 14px; color: #4b5563;">
+                  ${
+                    values.productsPrice !== undefined
+                      ? `
+                  <tr>
+                    <td style="font-weight: 500;">Items Subtotal:</td>
+                    <td align="right" style="font-weight: 600;">$${values.productsPrice.toFixed(2)}</td>
+                  </tr>
+                  `
+                      : ''
+                  }
+                  ${
+                    values.deliveryCharge !== undefined && values.deliveryCharge > 0
+                      ? `
+                  <tr>
+                    <td style="font-weight: 500;">Delivery Charge:</td>
+                    <td align="right" style="font-weight: 600;">$${values.deliveryCharge.toFixed(2)}</td>
+                  </tr>
+                  `
+                      : ''
+                  }
+                  ${
+                    values.serviceFee !== undefined && values.serviceFee > 0
+                      ? `
+                  <tr>
+                    <td style="font-weight: 500;">Service Fee:</td>
+                    <td align="right" style="font-weight: 600;">$${values.serviceFee.toFixed(2)}</td>
+                  </tr>
+                  `
+                      : ''
+                  }
+                  ${
+                    values.tax !== undefined && values.tax > 0
+                      ? `
+                  <tr>
+                    <td style="font-weight: 500;">Tax:</td>
+                    <td align="right" style="font-weight: 600;">$${values.tax.toFixed(2)}</td>
+                  </tr>
+                  `
+                      : ''
+                  }
+                  ${
+                    values.couponCode || values.discountAmount
+                      ? `
+                  <tr>
+                    <td style="font-weight: 500; color: #dc2626;">Discount${values.couponCode ? ` (${values.couponCode})` : ''}:</td>
+                    <td align="right" style="color: #dc2626; font-weight: 600;">-${values.discountAmount ? `$${values.discountAmount.toFixed(2)}` : 'Applied'}</td>
+                  </tr>
+                  `
+                      : ''
+                  }
+                  <tr>
+                    <td style="font-size: 16px; font-weight: bold; color: #173616; padding-top: 8px; border-top: 2px solid #e5e7eb;">Total Amount Paid:</td>
+                    <td align="right" style="font-size: 20px; font-weight: bold; color: #173616; padding-top: 8px; border-top: 2px solid #e5e7eb;">$${values.totalPrice.toFixed(2)}</td>
+                  </tr>
+                </table>
               </div>
               
               <p style="font-size: 16px; line-height: 1.6; color: #4b5563; margin: 28px 0 0 0;">
@@ -249,9 +303,63 @@ export const adminOrderNotification = (values: IAdminOrderNotification) => {
                 </tbody>
               </table>
 
-              <div style="background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 16px; text-align: right; margin-bottom: 24px;">
-                <span style="font-size: 15px; color: #065f46; font-weight: 600;">Total Revenue: </span>
-                <span style="font-size: 20px; color: #065f46; font-weight: bold; margin-left: 8px;">$${values.totalPrice.toFixed(2)}</span>
+              <div style="background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                <table width="100%" border="0" cellspacing="0" cellpadding="4" style="font-size: 14px; color: #065f46;">
+                  ${
+                    values.productsPrice !== undefined
+                      ? `
+                  <tr>
+                    <td style="font-weight: 500;">Items Subtotal:</td>
+                    <td align="right" style="font-weight: 600;">$${values.productsPrice.toFixed(2)}</td>
+                  </tr>
+                  `
+                      : ''
+                  }
+                  ${
+                    values.deliveryCharge !== undefined && values.deliveryCharge > 0
+                      ? `
+                  <tr>
+                    <td style="font-weight: 500;">Delivery Charge:</td>
+                    <td align="right" style="font-weight: 600;">$${values.deliveryCharge.toFixed(2)}</td>
+                  </tr>
+                  `
+                      : ''
+                  }
+                  ${
+                    values.serviceFee !== undefined && values.serviceFee > 0
+                      ? `
+                  <tr>
+                    <td style="font-weight: 500;">Service Fee:</td>
+                    <td align="right" style="font-weight: 600;">$${values.serviceFee.toFixed(2)}</td>
+                  </tr>
+                  `
+                      : ''
+                  }
+                  ${
+                    values.tax !== undefined && values.tax > 0
+                      ? `
+                  <tr>
+                    <td style="font-weight: 500;">Tax:</td>
+                    <td align="right" style="font-weight: 600;">$${values.tax.toFixed(2)}</td>
+                  </tr>
+                  `
+                      : ''
+                  }
+                  ${
+                    values.couponCode || values.discountAmount
+                      ? `
+                  <tr>
+                    <td style="font-weight: 500; color: #dc2626;">Discount${values.couponCode ? ` (${values.couponCode})` : ''}:</td>
+                    <td align="right" style="color: #dc2626; font-weight: 600;">-${values.discountAmount ? `$${values.discountAmount.toFixed(2)}` : 'Applied'}</td>
+                  </tr>
+                  `
+                      : ''
+                  }
+                  <tr>
+                    <td style="font-size: 16px; font-weight: bold; color: #065f46; padding-top: 8px; border-top: 2px solid #a7f3d0;">Total Revenue:</td>
+                    <td align="right" style="font-size: 20px; font-weight: bold; color: #065f46; padding-top: 8px; border-top: 2px solid #a7f3d0;">$${values.totalPrice.toFixed(2)}</td>
+                  </tr>
+                </table>
               </div>
               
               <p style="font-size: 16px; line-height: 1.6; color: #4b5563; margin: 28px 0 0 0;">

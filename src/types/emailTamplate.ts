@@ -46,6 +46,13 @@ export type IOrderConfirmation = {
   transactionId?: string;
   items: IOrderItem[];
   totalPrice: number;
+  originalPrice?: number;
+  productsPrice?: number;
+  deliveryCharge?: number;
+  serviceFee?: number;
+  tax?: number;
+  couponCode?: string;
+  discountAmount?: number;
   formattedAddress: string;
   contactNumber?: string;
 };
@@ -59,6 +66,13 @@ export type IAdminOrderNotification = {
   transactionId?: string;
   items: IOrderItem[];
   totalPrice: number;
+  originalPrice?: number;
+  productsPrice?: number;
+  deliveryCharge?: number;
+  serviceFee?: number;
+  tax?: number;
+  couponCode?: string;
+  discountAmount?: number;
   formattedAddress: string;
 };
 
@@ -83,6 +97,9 @@ export type IServiceBookingUserConfirmation = {
   name: string;
   serviceTitle: string;
   price: number;
+  originalPrice?: number;
+  couponCode?: string;
+  discountAmount?: number;
   phone?: string;
   preferredDate?: string;
   preferredTime?: string;
@@ -96,6 +113,9 @@ export type IServiceBookingAdminNotification = {
   customerEmail: string;
   serviceTitle: string;
   price: number;
+  originalPrice?: number;
+  couponCode?: string;
+  discountAmount?: number;
   phone?: string;
   preferredDate?: string;
   preferredTime?: string;

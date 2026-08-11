@@ -25,6 +25,7 @@ import { TestimonialRoutes } from '../app/modules/testimonial/testimonial.route'
 import { InquiryRoutes } from '../app/modules/inquiry/inquiry.route';
 import { DisclaimerRoutes } from '../app/modules/disclaimer/disclaimer.route';
 import { FaqRoutes } from '../app/modules/faq/faq.route';
+import { CouponRoutes } from '../app/modules/coupon/coupon.route';
 const router = express.Router();
 
 const apiRoutes = [
@@ -128,6 +129,10 @@ const apiRoutes = [
   {
     path: '/faq',
     route: FaqRoutes,
+  },
+  {
+    path: '/coupon',
+    route: CouponRoutes,
   },
 ];
 
