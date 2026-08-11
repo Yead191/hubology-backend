@@ -57,8 +57,8 @@ const getAllCoupon = async (query: Record<string, any>) => {
   const couponQuery = new QueryBuilder(Coupon.find(), query)
     .search(['name', 'coupon_code'])
     .filter()
-    .sort()
     .paginate()
+    .sort()
     .fields();
   const [coupons, pagination] = await Promise.all([
     couponQuery.modelQuery.lean(),

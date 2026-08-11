@@ -12,22 +12,30 @@ import { handleDigitalPurchase } from '../handlers/handleDigitalPurchase';
 export const handleStripeWebhook = async (req: Request, res: Response) => {
   try {
     const sig = req.headers['stripe-signature'];
-    let event = await stripe.webhooks.constructEvent(
-      req.body,
-      sig!,
-      config.stripe.webhook_secret!,
-    );
+    if (!sig) {
+      return res.status(400).send('Missing stripe-signature header');
+    }
+
+    let event: Stripe.Event;
+    try {
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        config.stripe.webhook_secret!,
+      );
+    } catch (err: any) {
+      console.error(`Webhook Signature Verification Failed: ${err.message}`);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
 
     switch (event.type) {
       case 'checkout.session.completed':
         const session = event.data.object as Stripe.Checkout.Session;
-        // console.log('sesstion================>>', session);
         if (session.metadata?.paymentType === 'donation') {
           await handleDonationCheckout(session);
         } else if (session.metadata?.orderId) {
           await handleOrderPurchase(session);
         } else if (session.metadata?.type === 'service') {
-          // console.log('service');
           await handleServiceBooking(session);
         } else if (session?.metadata?.type === 'digital-shop') {
           await handleDigitalPurchase(session);
@@ -38,7 +46,6 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
       case 'customer.subscription.created':
         const subscriptionCreatedSession = event.data
           .object as Stripe.Subscription;
-        // console.log(subscriptionCreatedSession);
         if (subscriptionCreatedSession.metadata?.membershipId) {
           await handleMembershipCheckout(subscriptionCreatedSession as any);
         }
@@ -47,7 +54,10 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
       default:
         console.log(`Unhandled event type ${event.type}`);
     }
+
+    return res.status(200).json({ received: true });
   } catch (error) {
-    console.log(error);
+    console.error('Stripe Webhook Processing Error:', error);
+    return res.status(500).send('Internal Server Error');
   }
 };
