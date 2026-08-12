@@ -10,35 +10,44 @@ const router = express.Router();
 router.post(
   '/login',
   validateRequest(AuthValidation.createLoginZodSchema),
-  AuthController.loginUser
+  AuthController.loginUser,
 );
 
 router.post(
   '/forget-password',
   validateRequest(AuthValidation.createForgetPasswordZodSchema),
-  AuthController.forgetPassword
+  AuthController.forgetPassword,
 );
 
 router.post(
   '/verify-email',
   validateRequest(AuthValidation.createVerifyEmailZodSchema),
-  AuthController.verifyEmail
+  AuthController.verifyEmail,
 );
 
 router.post(
   '/reset-password',
   validateRequest(AuthValidation.createResetPasswordZodSchema),
-  AuthController.resetPassword
+  AuthController.resetPassword,
 );
 
 router.post(
   '/change-password',
-  auth(USER_ROLES.ADMIN, USER_ROLES.USER),
+  auth(),
   validateRequest(AuthValidation.createChangePasswordZodSchema),
-  AuthController.changePassword
+  AuthController.changePassword,
 );
 // router.post('/register', validateRequest(AuthValidation.createRegisterZodSchema), AuthController.registerUser)
-router.post('/register', validateRequest(AuthValidation.createRegisterUserZodSchema), AuthController.registerUser)
-router.post('/register/vendor', fileUploadHandler(), validateRequest(AuthValidation.createRegisterVendorZodSchema), AuthController.registerVendor)
+router.post(
+  '/register',
+  validateRequest(AuthValidation.createRegisterUserZodSchema),
+  AuthController.registerUser,
+);
+router.post(
+  '/register/vendor',
+  fileUploadHandler(),
+  validateRequest(AuthValidation.createRegisterVendorZodSchema),
+  AuthController.registerVendor,
+);
 
 export const AuthRoutes = router;
