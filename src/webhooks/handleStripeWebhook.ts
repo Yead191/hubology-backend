@@ -1,13 +1,14 @@
 import { Request, Response } from 'express';
 import stripe from '../config/stripe';
 import config from '../config';
-import { handlePurchaseCheckout } from '../handlers/handlePurchaseCheckout';
 import { handleDonationCheckout } from '../handlers/handleDonationCheckout';
 import Stripe from 'stripe';
 import { handleOrderPurchase } from '../handlers/handleOrderPurchase';
 import { handleMembershipCheckout } from '../handlers/handleMembershipCheckout';
 import { handleServiceBooking } from '../handlers/handleServiceBooking';
 import { handleDigitalPurchase } from '../handlers/handleDigitalPurchase';
+import { handleInvoicePaymentSucceeded } from '../handlers/handleInvoicePaymentSucceeded';
+import { handleInvoicePaymentFailed } from '../handlers/handleInvoicePaymentFailed';
 
 export const handleStripeWebhook = async (req: Request, res: Response) => {
   try {
@@ -49,6 +50,16 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
         if (subscriptionCreatedSession.metadata?.membershipId) {
           await handleMembershipCheckout(subscriptionCreatedSession as any);
         }
+        break;
+
+      case 'invoice.payment_succeeded':
+        const invoicePaid = event.data.object as Stripe.Invoice;
+        await handleInvoicePaymentSucceeded(invoicePaid);
+        break;
+
+      case 'invoice.payment_failed':
+        const invoiceFailed = event.data.object as Stripe.Invoice;
+        await handleInvoicePaymentFailed(invoiceFailed);
         break;
 
       default:

@@ -85,6 +85,49 @@ export type IOrderStatusUpdate = {
   totalPrice?: number;
 };
 
+export type IMembershipSubscriptionUserConfirmation = {
+  email: string;
+  name: string;
+  membershipName: string;
+  price: number;
+  recurring: string;
+  isTrial: boolean;
+  trialPeriodDays?: number;
+  trialEndDate?: string;
+  transactionId?: string;
+};
+
+export type IAdminMembershipNotification = {
+  adminEmail: string;
+  adminName: string;
+  customerName: string;
+  customerEmail: string;
+  membershipName: string;
+  price: number;
+  recurring: string;
+  isTrial: boolean;
+  trialPeriodDays?: number;
+  trialEndDate?: string;
+  transactionId?: string;
+};
+
+export type ISubscriptionPaymentSuccess = {
+  email: string;
+  name: string;
+  membershipName: string;
+  amountPaid: number;
+  transactionId?: string;
+  nextBillingDate?: string;
+};
+
+export type ISubscriptionPaymentFailed = {
+  email: string;
+  name: string;
+  membershipName: string;
+  amountDue: number;
+  reason?: string;
+};
+
 export type IVendorStatusUpdate = {
   email: string;
   name: string;

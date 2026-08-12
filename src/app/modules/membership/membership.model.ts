@@ -66,9 +66,13 @@ const membershipSchema = new Schema<IMembership, MembershipModel>(
       type: String,
       required: false,
     },
+    has_trial: {
+      type: Boolean,
+      default: false,
+    },
     trial_period_days: {
       type: Number,
-      required: false,
+      default: 0,
     },
   },
   { timestamps: true },

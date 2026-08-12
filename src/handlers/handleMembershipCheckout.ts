@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
 import Stripe from 'stripe';
 import stripe from '../config/stripe';
+import config from '../config';
+import { USER_ROLES } from '../enums/user';
 import { Membership } from '../app/modules/membership/membership.model';
 import { Subscription } from '../app/modules/subscription/subscription.model';
 import { User } from '../app/modules/user/user.model';
@@ -113,6 +115,17 @@ export const handleMembershipCheckout = async (
       endDate.setMonth(endDate.getMonth() + intervalCount);
     }
 
+    const isTrial = Boolean(
+      membership?.has_trial && (membership?.trial_period_days || 0) > 0,
+    );
+    const trialDays = isTrial ? membership.trial_period_days : 0;
+    const trialEndDate = isTrial
+      ? new Date(startDate.getTime() + trialDays * 24 * 60 * 60 * 1000)
+      : undefined;
+    const formattedTrialEndDate = trialEndDate
+      ? trialEndDate.toISOString().split('T')[0]
+      : undefined;
+
     // 5. Store information in Subscription model
     const [subscription] = await Subscription.create(
       [
@@ -128,14 +141,9 @@ export const handleMembershipCheckout = async (
           features: membership.features || [],
           payment_intent_id: stripeSubscriptionId,
           trxId: stripeSubscriptionId,
-          is_trial: membership?.trial_period_days > 0,
-          trial_period_days: membership?.trial_period_days || 0,
-          trial_end_date: membership?.trial_period_days
-            ? new Date(
-                startDate.getTime() +
-                  membership.trial_period_days * 24 * 60 * 60 * 1000,
-              )
-            : undefined,
+          is_trial: isTrial,
+          trial_period_days: trialDays,
+          trial_end_date: trialEndDate,
         },
       ],
       { session: mongoSession },
@@ -154,7 +162,7 @@ export const handleMembershipCheckout = async (
         {
           user: user._id,
           total_price: membership.price,
-          payment_received: membership.price,
+          payment_received: isTrial ? 0 : membership.price,
           status: TRANSACTION_STATUS.SUCCESS,
           type: TRANSACTION_TYPE.CREDIT,
           category: TRANSACTION_CATEGORY.MEMBERSHIP,
@@ -165,30 +173,86 @@ export const handleMembershipCheckout = async (
     );
 
     // 7. Send Notifications & Email
+    const userMessage = isTrial
+      ? `Your ${membership.name} membership is active with a ${trialDays}-day free trial!`
+      : `Your ${membership.name} membership plan is now active!`;
+
     await NotificationServices.createNotification({
       receiver: user._id,
       title: 'Membership Activated',
-      message: `Your ${membership.name} membership plan is now active!`,
+      message: userMessage,
       refId: subscription._id,
       path: '/dashboard/subscriptions',
     });
 
+    const adminMessage = isTrial
+      ? `${user.name} subscribed to ${membership.name} (${trialDays}-day free trial).`
+      : `${user.name} subscribed to ${membership.name} ($${membership.price}/${membership.recurring}).`;
+
     await NotificationServices.sendNotificationToAdmins({
       title: 'New Membership Subscription',
-      message: `${user.name} subscribed to ${membership.name} ($${membership.price}).`,
+      message: adminMessage,
       refId: subscription._id,
       path: `/membership/${membership?._id?.toString()}/subscribers`,
     });
 
     if (user.email) {
-      const emailData = emailTemplate.orderStatusUpdate({
-        email: user.email,
-        name: user.name || 'Member',
-        orderId: membership.name,
-        status: `Active (${membership.name})`,
-        totalPrice: membership.price,
+      try {
+        const userEmailData =
+          emailTemplate.membershipSubscriptionUserConfirmation({
+            email: user.email,
+            name: user.name || 'Member',
+            membershipName: membership.name,
+            price: Number(membership.price),
+            recurring: membership.recurring || 'month',
+            isTrial,
+            trialPeriodDays: trialDays,
+            trialEndDate: formattedTrialEndDate,
+            transactionId: stripeSubscriptionId,
+          });
+        await emailHelper.sendEmail(userEmailData);
+      } catch (emailErr) {
+        console.error(
+          'Failed to send user membership confirmation email:',
+          emailErr,
+        );
+      }
+    }
+
+    try {
+      const admins = await User.find({
+        $or: [{ role: USER_ROLES.ADMIN }, { role: USER_ROLES.SUPER_ADMIN }],
       });
-      await emailHelper.sendEmail(emailData);
+
+      const adminEmails = Array.from(
+        new Set(
+          [...admins.map(a => a.email), config.super_admin.email].filter(
+            Boolean,
+          ),
+        ),
+      );
+
+      for (const adminEmail of adminEmails) {
+        const adminEmailData = emailTemplate.adminMembershipNotification({
+          adminEmail: adminEmail as string,
+          adminName: 'Admin',
+          customerName: user.name || 'Customer',
+          customerEmail: user.email || 'N/A',
+          membershipName: membership.name,
+          price: Number(membership.price),
+          recurring: membership.recurring || 'month',
+          isTrial,
+          trialPeriodDays: trialDays,
+          trialEndDate: formattedTrialEndDate,
+          transactionId: stripeSubscriptionId,
+        });
+        await emailHelper.sendEmail(adminEmailData);
+      }
+    } catch (adminEmailErr) {
+      console.error(
+        'Failed to send admin membership notification email:',
+        adminEmailErr,
+      );
     }
 
     await mongoSession.commitTransaction();

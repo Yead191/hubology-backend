@@ -22,6 +22,12 @@ import {
   inquiryUserConfirmation,
   inquiryAdminNotification,
 } from '../templates/inquiryTemplate';
+import {
+  membershipSubscriptionUserConfirmation,
+  adminMembershipNotification,
+  subscriptionPaymentSuccess,
+  subscriptionPaymentFailed,
+} from '../templates/subscriptionTemplate';
 
 export const emailTemplate = {
   createAccount,
@@ -38,4 +44,8 @@ export const emailTemplate = {
   serviceBookingAdminNotification,
   inquiryUserConfirmation,
   inquiryAdminNotification,
+  membershipSubscriptionUserConfirmation,
+  adminMembershipNotification,
+  subscriptionPaymentSuccess,
+  subscriptionPaymentFailed,
 };

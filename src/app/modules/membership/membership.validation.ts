@@ -30,6 +30,8 @@ const createMembershipZodSchema = z.object({
         features: z.array(z.string()).nonempty({
             message: 'At least one feature is required.',
         }),
+        has_trial: z.boolean().optional(),
+        trial_period_days: z.number().min(0).optional(),
     }),
 });
 
@@ -47,6 +49,8 @@ const updateMembershipZodSchema = z.object({
         featured: z.coerce.boolean().optional(),
         highlight: z.string().trim().optional(),
         features: z.array(z.string()).min(1, 'At least one feature is required').optional(),
+        has_trial: z.boolean().optional(),
+        trial_period_days: z.number().min(0).optional(),
     }),
 });
 

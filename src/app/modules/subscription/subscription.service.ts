@@ -9,7 +9,10 @@ import { StatusCodes } from 'http-status-codes';
 
 const subscribePackage = async (user: JwtPayload, packageId: string) => {
   const membership = await Membership.findOne({ _id: packageId });
-
+  const userSubscription = await Subscription.findOne({
+    user: user.id,
+    status: 'active',
+  }).select('plan');
   if (!membership) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Membership not found');
   }
@@ -20,6 +23,26 @@ const subscribePackage = async (user: JwtPayload, packageId: string) => {
       `You are ${user.role}, can't subscribe ${membership.type} membership.`,
     );
   }
+  if (
+    userSubscription &&
+    userSubscription.plan.toString() === membership._id.toString()
+  ) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      `You are already subscribed to ${membership.name}.`,
+    );
+  }
+
+  const hasTakenTrial = await Subscription.exists({
+    user: user.id,
+    $or: [{ is_trial: true }, { trial_period_days: { $gt: 0 } }],
+  });
+
+  const shouldGiveTrial =
+    !hasTakenTrial &&
+    membership.has_trial &&
+    membership.trial_period_days &&
+    membership.trial_period_days > 0;
 
   const subscriptionCheckoutSession = await stripe.checkout.sessions.create({
     line_items: [
@@ -41,7 +64,9 @@ const subscribePackage = async (user: JwtPayload, packageId: string) => {
         userId: user.id,
         membershipId: packageId,
       },
-      trial_period_days: membership.trial_period_days,
+      ...(shouldGiveTrial
+        ? { trial_period_days: membership.trial_period_days }
+        : {}),
     },
   });
 
