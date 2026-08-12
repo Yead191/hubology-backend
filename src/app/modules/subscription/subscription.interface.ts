@@ -5,7 +5,7 @@ export type ISubscription = {
   user: Types.ObjectId;
   plan: Types.ObjectId;
   name: string;
-  status: 'active' | 'inactive' | 'cancel' | 'expire';
+  status: 'active' | 'inactive' | 'cancel' | 'expire' | 'cancel-pending';
   start_date: Date;
   recuring?: 'Free' | 'Monthly' | 'Yearly';
   end_date: Date;

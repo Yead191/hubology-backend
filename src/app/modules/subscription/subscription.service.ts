@@ -6,6 +6,10 @@ import config from '../../../config';
 import { Subscription } from './subscription.model';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { StatusCodes } from 'http-status-codes';
+import { User } from '../user/user.model';
+import { NotificationServices } from '../notification/notification.service';
+import { emailHelper } from '../../../helpers/emailHelper';
+import { emailTemplate } from '../../../shared/emailTemplate';
 
 const subscribePackage = async (user: JwtPayload, packageId: string) => {
   const membership = await Membership.findOne({ _id: packageId });
@@ -114,8 +118,98 @@ const getSubsribersByPackage = async (
   return { data, pagination };
 };
 
+const cancelSubscription = async (
+  user: JwtPayload,
+  subscriptionId: string,
+  cancelType: 'end_of_period' | 'immediate',
+) => {
+  const subscription = await Subscription.findOne({
+    user: user.id,
+    _id: subscriptionId,
+    status: 'active',
+  });
+  if (!subscription) {
+    throw new ApiError(
+      StatusCodes.NOT_FOUND,
+      'Active subscription not found for this user',
+    );
+  }
+
+  const stripeSubscriptionId =
+    subscription.trxId || subscription.payment_intent_id;
+
+  if (!stripeSubscriptionId) {
+    throw new ApiError(
+      StatusCodes.NOT_FOUND,
+      'No valid Stripe subscription ID found!',
+    );
+  }
+  if (cancelType === 'immediate') {
+    await stripe.subscriptions.cancel(stripeSubscriptionId);
+  } else {
+    await stripe.subscriptions.update(stripeSubscriptionId, {
+      cancel_at_period_end: true,
+    });
+  }
+  subscription.status =
+    cancelType === 'immediate' ? 'cancel' : 'cancel-pending';
+  await subscription.save();
+
+  const userProfile = await User.findById(user.id);
+  const formattedEndDate = subscription.end_date
+    ? subscription.end_date.toISOString().split('T')[0]
+    : undefined;
+
+  // Send In-App Notification
+  await NotificationServices.createNotification({
+    receiver: user.id,
+    title: 'Subscription Canceled',
+    message:
+      cancelType === 'immediate'
+        ? `Your subscription for ${subscription.name} was canceled immediately.`
+        : `Auto-renew turned off for your ${subscription.name} subscription. Active until ${formattedEndDate}.`,
+    refId: subscription._id,
+    path: '/dashboard/subscriptions',
+  });
+
+  // Send Email Confirmation
+  if (userProfile?.email) {
+    try {
+      const emailData = emailTemplate.subscriptionCancelled({
+        email: userProfile.email,
+        name: userProfile.name || 'Member',
+        membershipName: subscription.name,
+        cancelType,
+        endDate: formattedEndDate,
+      });
+      await emailHelper.sendEmail(emailData);
+    } catch (emailErr) {
+      console.error(
+        'Failed to send subscription cancellation email:',
+        emailErr,
+      );
+    }
+  }
+
+  return subscription;
+};
+
+const checkTrialEligibility = async (user: JwtPayload) => {
+  const hasTakenTrial = await Subscription.exists({
+    user: user.id,
+    $or: [{ is_trial: true }, { trial_period_days: { $gt: 0 } }],
+  });
+
+  return {
+    isEligible: !hasTakenTrial,
+    hasTakenTrial: Boolean(hasTakenTrial),
+  };
+};
+
 export const SubscriptionServices = {
   subscribePackage,
   getMySubcription,
   getSubsribersByPackage,
+  cancelSubscription,
+  checkTrialEligibility,
 };

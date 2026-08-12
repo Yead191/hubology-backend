@@ -105,26 +105,63 @@ export const handleMembershipCheckout = async (
       { status: 'inactive' },
     ).session(mongoSession);
 
-    // 4. Calculate subscription start and end dates
-    const startDate = new Date();
-    const endDate = new Date(startDate);
-    const intervalCount = membership.interval || 1;
-    if (membership.recurring === 'year') {
-      endDate.setFullYear(endDate.getFullYear() + intervalCount);
-    } else {
-      endDate.setMonth(endDate.getMonth() + intervalCount);
+    // 4. Retrieve Stripe subscription to accurately check trial status
+    let stripeSubscription: Stripe.Subscription | null = null;
+    if (checkoutSession && checkoutSession.object === 'subscription') {
+      stripeSubscription = checkoutSession as Stripe.Subscription;
+    } else if (
+      stripeSubscriptionId &&
+      typeof stripeSubscriptionId === 'string' &&
+      stripeSubscriptionId.startsWith('sub_')
+    ) {
+      try {
+        stripeSubscription =
+          await stripe.subscriptions.retrieve(stripeSubscriptionId);
+      } catch (err) {
+        console.error(
+          '[Membership Checkout] Error retrieving Stripe subscription:',
+          err,
+        );
+      }
     }
 
-    const isTrial = Boolean(
-      membership?.has_trial && (membership?.trial_period_days || 0) > 0,
-    );
-    const trialDays = isTrial ? membership.trial_period_days : 0;
-    const trialEndDate = isTrial
-      ? new Date(startDate.getTime() + trialDays * 24 * 60 * 60 * 1000)
-      : undefined;
+    // Accurately determine if this specific purchase received a trial from Stripe
+    const isTrial = stripeSubscription
+      ? stripeSubscription.status === 'trialing' ||
+        Boolean(
+          stripeSubscription.trial_end &&
+            stripeSubscription.trial_end * 1000 > Date.now(),
+        )
+      : Boolean(
+          membership?.has_trial && (membership?.trial_period_days || 0) > 0,
+        );
+
+    const trialDays = isTrial ? membership?.trial_period_days || 0 : 0;
+    const startDate = new Date();
+
+    const trialEndDate = stripeSubscription?.trial_end
+      ? new Date(stripeSubscription.trial_end * 1000)
+      : isTrial && trialDays > 0
+        ? new Date(startDate.getTime() + trialDays * 24 * 60 * 60 * 1000)
+        : undefined;
+
     const formattedTrialEndDate = trialEndDate
       ? trialEndDate.toISOString().split('T')[0]
       : undefined;
+
+    // Calculate subscription end date (ends at trial end date if trial, or 1 interval if paid)
+    let endDate: Date;
+    if (isTrial && trialEndDate) {
+      endDate = new Date(trialEndDate);
+    } else {
+      endDate = new Date(startDate);
+      const intervalCount = membership.interval || 1;
+      if (membership.recurring === 'year') {
+        endDate.setFullYear(endDate.getFullYear() + intervalCount);
+      } else {
+        endDate.setMonth(endDate.getMonth() + intervalCount);
+      }
+    }
 
     // 5. Store information in Subscription model
     const [subscription] = await Subscription.create(
@@ -174,7 +211,7 @@ export const handleMembershipCheckout = async (
 
     // 7. Send Notifications & Email
     const userMessage = isTrial
-      ? `Your ${membership.name} membership is active with a ${trialDays}-day free trial!`
+      ? `Your ${membership.name} membership is active with a ${trialDays}-day free trial! Trial ends on ${formattedTrialEndDate || ''}.`
       : `Your ${membership.name} membership plan is now active!`;
 
     await NotificationServices.createNotification({
@@ -196,6 +233,10 @@ export const handleMembershipCheckout = async (
       path: `/membership/${membership?._id?.toString()}/subscribers`,
     });
 
+    const formattedStartDate = startDate.toISOString().split('T')[0];
+    const formattedEndDate = endDate.toISOString().split('T')[0];
+    const planFeatures = membership.features || [];
+
     if (user.email) {
       try {
         const userEmailData =
@@ -208,6 +249,9 @@ export const handleMembershipCheckout = async (
             isTrial,
             trialPeriodDays: trialDays,
             trialEndDate: formattedTrialEndDate,
+            startDate: formattedStartDate,
+            endDate: formattedEndDate,
+            features: planFeatures,
             transactionId: stripeSubscriptionId,
           });
         await emailHelper.sendEmail(userEmailData);
@@ -244,6 +288,9 @@ export const handleMembershipCheckout = async (
           isTrial,
           trialPeriodDays: trialDays,
           trialEndDate: formattedTrialEndDate,
+          startDate: formattedStartDate,
+          endDate: formattedEndDate,
+          features: planFeatures,
           transactionId: stripeSubscriptionId,
         });
         await emailHelper.sendEmail(adminEmailData);

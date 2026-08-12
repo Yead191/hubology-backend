@@ -27,6 +27,7 @@ import {
   adminMembershipNotification,
   subscriptionPaymentSuccess,
   subscriptionPaymentFailed,
+  subscriptionCancelled,
 } from '../templates/subscriptionTemplate';
 
 export const emailTemplate = {
@@ -48,4 +49,5 @@ export const emailTemplate = {
   adminMembershipNotification,
   subscriptionPaymentSuccess,
   subscriptionPaymentFailed,
+  subscriptionCancelled,
 };

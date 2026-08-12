@@ -60,7 +60,7 @@ const getUserProfileFromDB = async (
   const { id } = user;
   const isExistUser = await User.findOne({ _id: id }).populate(
     'subscription',
-    'name start_date end_date status is_trial plan',
+    // 'name start_date end_date status is_trial plan',
   );
   if (!isExistUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");

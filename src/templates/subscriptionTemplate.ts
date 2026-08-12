@@ -4,6 +4,7 @@ import {
   IAdminMembershipNotification,
   ISubscriptionPaymentSuccess,
   ISubscriptionPaymentFailed,
+  ISubscriptionCancelled,
 } from '../types/emailTamplate';
 
 const getLogoUrl = () => {
@@ -50,7 +51,7 @@ export const membershipSubscriptionUserConfirmation = (
               <p style="font-size: 16px; line-height: 1.6; color: #4b5563; margin: 0 0 24px 0;">
                 ${
                   values.isTrial
-                    ? `Your free trial for <strong>${values.membershipName}</strong> is now active for <strong>${values.trialPeriodDays} days</strong>.`
+                    ? `Your free trial for <strong>${values.membershipName}</strong> is now active for <strong>${values.trialPeriodDays} days</strong>${values.trialEndDate ? ` (ends on <strong>${values.trialEndDate}</strong>)` : ''}.`
                     : `Your subscription to <strong>${values.membershipName}</strong> has been successfully activated.`
                 } Here are your membership details:
               </p>
@@ -81,6 +82,26 @@ export const membershipSubscriptionUserConfirmation = (
                       : ''
                   }
                   ${
+                    values.startDate
+                      ? `
+                  <tr>
+                    <td style="font-weight: bold; border-bottom: 1px solid #f3f4f6;">Start Date:</td>
+                    <td style="border-bottom: 1px solid #f3f4f6;">${values.startDate}</td>
+                  </tr>
+                  `
+                      : ''
+                  }
+                  ${
+                    values.endDate
+                      ? `
+                  <tr>
+                    <td style="font-weight: bold; border-bottom: 1px solid #f3f4f6;">${values.isTrial ? 'Trial End Date' : 'Subscription End Date'}:</td>
+                    <td style="font-weight: bold; color: ${values.isTrial ? '#1e40af' : '#173616'}; border-bottom: 1px solid #f3f4f6;">${values.endDate}</td>
+                  </tr>
+                  `
+                      : ''
+                  }
+                  ${
                     values.transactionId
                       ? `
                   <tr>
@@ -92,6 +113,20 @@ export const membershipSubscriptionUserConfirmation = (
                   }
                 </table>
               </div>
+
+              ${
+                values.features && values.features.length > 0
+                  ? `
+              <!-- Features Section -->
+              <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+                <h3 style="font-size: 15px; font-weight: 700; color: #166534; margin: 0 0 12px 0;">Included Features:</h3>
+                <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #15803d; line-height: 1.8;">
+                  ${values.features.map((feature: any) => `<li>${typeof feature === 'object' ? feature.name || JSON.stringify(feature) : feature}</li>`).join('')}
+                </ul>
+              </div>
+              `
+                  : ''
+              }
               
               <p style="font-size: 16px; line-height: 1.6; color: #4b5563; margin: 28px 0 0 0;">
                 Best regards,<br />
@@ -173,6 +208,26 @@ export const adminMembershipNotification = (
                   <tr>
                     <td style="font-weight: bold; border-bottom: 1px solid #f3f4f6;">Trial Status:</td>
                     <td style="color: #1e40af; font-weight: bold; border-bottom: 1px solid #f3f4f6;">${values.trialPeriodDays}-Day Free Trial ${values.trialEndDate ? `(Ends ${values.trialEndDate})` : ''}</td>
+                  </tr>
+                  `
+                      : ''
+                  }
+                  ${
+                    values.startDate
+                      ? `
+                  <tr>
+                    <td style="font-weight: bold; border-bottom: 1px solid #f3f4f6;">Start Date:</td>
+                    <td style="border-bottom: 1px solid #f3f4f6;">${values.startDate}</td>
+                  </tr>
+                  `
+                      : ''
+                  }
+                  ${
+                    values.endDate
+                      ? `
+                  <tr>
+                    <td style="font-weight: bold; border-bottom: 1px solid #f3f4f6;">${values.isTrial ? 'Trial End Date' : 'Subscription End Date'}:</td>
+                    <td style="font-weight: bold; color: ${values.isTrial ? '#1e40af' : '#173616'}; border-bottom: 1px solid #f3f4f6;">${values.endDate}</td>
                   </tr>
                   `
                       : ''
@@ -347,6 +402,90 @@ export const subscriptionPaymentFailed = (
               <p style="font-size: 16px; line-height: 1.6; color: #4b5563; margin: 0 0 24px 0;">
                 Please log in to your account and update your payment method to avoid any interruption to your membership services.
               </p>
+              
+              <p style="font-size: 16px; line-height: 1.6; color: #4b5563; margin: 28px 0 0 0;">
+                Best regards,<br />
+                <strong>The Hubology Team</strong>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="background-color: #f9fafb; padding: 30px 20px; border-top: 1px solid #e5e7eb; text-align: center;">
+              <p style="font-size: 12px; color: #9ca3af; margin: 0;">
+                &copy; ${new Date().getFullYear()} Hubology. All rights reserved.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+    `,
+  };
+};
+
+export const subscriptionCancelled = (values: ISubscriptionCancelled) => {
+  const logoUrl = getLogoUrl();
+  const isImmediate = values.cancelType === 'immediate';
+
+  return {
+    to: values.email,
+    subject: `Subscription Canceled: ${values.membershipName}`,
+    html: `
+<body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f6f8; margin: 0; padding: 40px 0; color: #333333; -webkit-font-smoothing: antialiased;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f6f8;">
+    <tr>
+      <td align="center">
+        <table width="100%" max-width="600" border="0" cellspacing="0" cellpadding="0" style="width: 100%; max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin: 30px auto;">
+          <tr>
+            <td align="center" style="background-color: #0D1026; padding: 35px 20px; border-bottom: 4px solid #f59e0b;">
+              <img src="${logoUrl}" alt="Hubology Logo" style="display: block; width: 180px; height: auto;" />
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 40px 40px 30px 40px;">
+              <div style="text-align: center; margin-bottom: 24px;">
+                <span style="background-color: #fef3c7; color: #92400e; padding: 6px 16px; border-radius: 50px; font-size: 14px; font-weight: 600;">
+                  ${isImmediate ? 'Subscription Canceled' : 'Auto-Renew Canceled'}
+                </span>
+              </div>
+              <h1 style="color: #173616; font-size: 22px; font-weight: 700; margin: 0 0 20px 0; text-align: center;">
+                Subscription Cancellation Notice
+              </h1>
+              <p style="font-size: 16px; line-height: 1.6; color: #4b5563; margin: 0 0 20px 0;">
+                Dear <strong>${values.name}</strong>,
+              </p>
+              <p style="font-size: 16px; line-height: 1.6; color: #4b5563; margin: 0 0 24px 0;">
+                ${
+                  isImmediate
+                    ? `Your subscription for <strong>${values.membershipName}</strong> has been canceled immediately.`
+                    : `Auto-renew for your <strong>${values.membershipName}</strong> subscription has been turned off. You will retain access until <strong>${values.endDate || 'the end of your current billing cycle'}</strong>.`
+                }
+              </p>
+              
+              <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+                <table width="100%" border="0" cellspacing="0" cellpadding="6" style="font-size: 14px; color: #4b5563;">
+                  <tr>
+                    <td style="font-weight: bold; width: 40%; border-bottom: 1px solid #f3f4f6;">Membership Plan:</td>
+                    <td style="font-weight: bold; color: #173616; border-bottom: 1px solid #f3f4f6;">${values.membershipName}</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: bold; border-bottom: 1px solid #f3f4f6;">Cancellation Type:</td>
+                    <td style="border-bottom: 1px solid #f3f4f6;">${isImmediate ? 'Immediate Revocation' : 'Cancel at Period End'}</td>
+                  </tr>
+                  ${
+                    values.endDate && !isImmediate
+                      ? `
+                  <tr>
+                    <td style="font-weight: bold;">Access Valid Until:</td>
+                    <td style="font-weight: bold; color: #b45309;">${values.endDate}</td>
+                  </tr>
+                  `
+                      : ''
+                  }
+                </table>
+              </div>
               
               <p style="font-size: 16px; line-height: 1.6; color: #4b5563; margin: 28px 0 0 0;">
                 Best regards,<br />

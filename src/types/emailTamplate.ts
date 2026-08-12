@@ -94,6 +94,9 @@ export type IMembershipSubscriptionUserConfirmation = {
   isTrial: boolean;
   trialPeriodDays?: number;
   trialEndDate?: string;
+  startDate?: string;
+  endDate?: string;
+  features?: string[];
   transactionId?: string;
 };
 
@@ -108,6 +111,9 @@ export type IAdminMembershipNotification = {
   isTrial: boolean;
   trialPeriodDays?: number;
   trialEndDate?: string;
+  startDate?: string;
+  endDate?: string;
+  features?: string[];
   transactionId?: string;
 };
 
@@ -188,4 +194,12 @@ export type IInquiryAdminNotification = {
 export type IWelcomeAccount = {
   name: string;
   email: string;
+};
+
+export type ISubscriptionCancelled = {
+  email: string;
+  name: string;
+  membershipName: string;
+  cancelType: 'end_of_period' | 'immediate';
+  endDate?: string;
 };

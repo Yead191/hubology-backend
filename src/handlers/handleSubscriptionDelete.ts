@@ -7,9 +7,9 @@ const handleSubscriptionDelete = async (id: string) => {
   try {
     await session.startTransaction();
     await Subscription.findOneAndUpdate(
-      { trxId: id },
+      { $or: [{ trxId: id }, { payment_intent_id: id }] },
       {
-        status: 'expire',
+        status: 'cancel',
       },
       { session },
     );

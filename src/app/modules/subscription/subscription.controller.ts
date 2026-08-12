@@ -46,8 +46,35 @@ const getSubsribersByPackage = catchAsync(
   },
 );
 
+const cancelSubscription = catchAsync(async (req: Request, res: Response) => {
+  const { subscriptionId, cancelType } = req.body;
+  const result = await SubscriptionServices.cancelSubscription(
+    req.user,
+    subscriptionId,
+    cancelType,
+  );
+  return sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Subscription cancelled successfully!',
+    data: result,
+  });
+});
+
+const checkTrialEligibility = catchAsync(async (req: Request, res: Response) => {
+  const result = await SubscriptionServices.checkTrialEligibility(req.user);
+  return sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Trial eligibility status retrieved successfully!',
+    data: result,
+  });
+});
+
 export const SubscriptionController = {
   subscribePackage,
   getMySubcription,
   getSubsribersByPackage,
+  cancelSubscription,
+  checkTrialEligibility,
 };
