@@ -12,7 +12,7 @@ export type IMembership = {
 
   price: number;
 
-  recurring: 'month' | 'year';
+  recurring: 'week' | 'month' | 'year';
 
   interval: number;
 
@@ -27,6 +27,7 @@ export type IMembership = {
   productId: string;
   paymentUrl: string;
   type: MembershipType;
+  is_auto_renew?: boolean;
 };
 
 export type MembershipModel = Model<IMembership>;

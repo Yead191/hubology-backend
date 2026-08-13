@@ -101,6 +101,10 @@ export const membershipSubscriptionUserConfirmation = (
                   `
                       : ''
                   }
+                  <tr>
+                    <td style="font-weight: bold; border-bottom: 1px solid #f3f4f6;">Auto Renew:</td>
+                    <td style="font-weight: bold; color: ${values.autoRenew !== false ? '#166534' : '#b45309'}; border-bottom: 1px solid #f3f4f6;">${values.autoRenew !== false ? 'Enabled (Auto-charge)' : 'Disabled (Expires at end of cycle)'}</td>
+                  </tr>
                   ${
                     values.transactionId
                       ? `
@@ -232,6 +236,10 @@ export const adminMembershipNotification = (
                   `
                       : ''
                   }
+                  <tr>
+                    <td style="font-weight: bold; border-bottom: 1px solid #f3f4f6;">Auto Renew:</td>
+                    <td style="font-weight: bold; color: ${values.autoRenew !== false ? '#166534' : '#b45309'}; border-bottom: 1px solid #f3f4f6;">${values.autoRenew !== false ? 'Enabled (Auto-charge)' : 'Disabled (Expires at end of cycle)'}</td>
+                  </tr>
                   ${
                     values.transactionId
                       ? `

@@ -20,7 +20,7 @@ const subscriptionSchema = new Schema<ISubscription, SubscriptionModel>(
     },
     recuring: {
       type: String,
-      enum: ['month', 'year'],
+      enum: ['week', 'month', 'year'],
       default: 'month',
     },
     status: {
@@ -60,6 +60,10 @@ const subscriptionSchema = new Schema<ISubscription, SubscriptionModel>(
     },
     trial_end_date: {
       type: Date,
+    },
+    auto_renew: {
+      type: Boolean,
+      default: true,
     },
   },
   { timestamps: true },

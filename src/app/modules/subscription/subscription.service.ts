@@ -11,12 +11,18 @@ import { NotificationServices } from '../notification/notification.service';
 import { emailHelper } from '../../../helpers/emailHelper';
 import { emailTemplate } from '../../../shared/emailTemplate';
 
-const subscribePackage = async (user: JwtPayload, packageId: string) => {
+const subscribePackage = async (
+  user: JwtPayload,
+  packageId: string,
+  autoRenew: boolean = true,
+) => {
   const membership = await Membership.findOne({ _id: packageId });
   const userSubscription = await Subscription.findOne({
     user: user.id,
     status: 'active',
   }).select('plan');
+
+  // validations
   if (!membership) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Membership not found');
   }
@@ -42,6 +48,9 @@ const subscribePackage = async (user: JwtPayload, packageId: string) => {
     $or: [{ is_trial: true }, { trial_period_days: { $gt: 0 } }],
   });
 
+  // check auto renew
+  const isAutoRenew = autoRenew && (membership.is_auto_renew ?? true);
+
   const shouldGiveTrial =
     !hasTakenTrial &&
     membership.has_trial &&
@@ -62,12 +71,14 @@ const subscribePackage = async (user: JwtPayload, packageId: string) => {
     metadata: {
       userId: user.id,
       membershipId: packageId,
+      autoRenew: String(isAutoRenew),
     },
     subscription_data: {
       metadata: {
         userId: user.id,
         membershipId: packageId,
       },
+
       ...(shouldGiveTrial
         ? { trial_period_days: membership.trial_period_days }
         : {}),
@@ -85,10 +96,9 @@ const subscribePackage = async (user: JwtPayload, packageId: string) => {
 };
 
 const getMySubcription = async (user: JwtPayload) => {
-  const result = await Subscription.find({ user: user.id }).populate(
-    'user',
-    'name email',
-  );
+  const result = await Subscription.find({ user: user.id })
+    .populate('user', 'name email')
+    .sort({ createdAt: -1 });
   if (!result.length) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'No subscription found!');
   }

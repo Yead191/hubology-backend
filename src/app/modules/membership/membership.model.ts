@@ -30,7 +30,7 @@ const membershipSchema = new Schema<IMembership, MembershipModel>(
     recurring: {
       type: String,
       required: false,
-      enum: ['month', 'year'],
+      enum: ['week', 'month', 'year'],
       default: 'month',
     },
     interval: {
@@ -73,6 +73,10 @@ const membershipSchema = new Schema<IMembership, MembershipModel>(
     trial_period_days: {
       type: Number,
       default: 0,
+    },
+    is_auto_renew: {
+      type: Boolean,
+      default: true,
     },
   },
   { timestamps: true },

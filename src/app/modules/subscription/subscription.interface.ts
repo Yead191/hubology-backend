@@ -7,7 +7,7 @@ export type ISubscription = {
   name: string;
   status: 'active' | 'inactive' | 'cancel' | 'expire' | 'cancel-pending';
   start_date: Date;
-  recuring?: 'Free' | 'Monthly' | 'Yearly';
+  recuring?: 'week' | 'month' | 'year' | 'free';
   end_date: Date;
   trial_period_days?: number;
   is_trial?: boolean;
@@ -16,6 +16,7 @@ export type ISubscription = {
   features: string[];
   payment_intent_id?: string;
   trxId?: string;
+  auto_renew?: boolean;
 };
 
 export type SubscriptionModel = Model<ISubscription>;

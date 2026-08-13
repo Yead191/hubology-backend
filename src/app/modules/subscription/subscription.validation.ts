@@ -9,4 +9,13 @@ const cancelSubscriptionZod = z.object({
   }),
 });
 
-export const SubscriptionValidations = { cancelSubscriptionZod };
+const subscribePackageZod = z.object({
+  body: z.object({
+    auto_renew: z.boolean().optional(),
+  }),
+});
+
+export const SubscriptionValidations = {
+  cancelSubscriptionZod,
+  subscribePackageZod,
+};

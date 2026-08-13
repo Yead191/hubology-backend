@@ -19,15 +19,19 @@ import { emailTemplate } from '../shared/emailTemplate';
 export const handleMembershipCheckout = async (
   checkoutSession: Stripe.Checkout.Session | Stripe.Subscription | any,
 ) => {
-  const mongoSession = await mongoose.startSession();
+  const maxRetries = 3;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    const mongoSession = await mongoose.startSession();
 
-  try {
-    mongoSession.startTransaction();
+    try {
+      mongoSession.startTransaction();
 
     const metadata = checkoutSession?.metadata || {};
     // console.log(metadata);
     const membershipId = metadata?.membershipId;
     const userId = metadata?.userId;
+    const autoRenew = metadata?.autoRenew != 'false';
+
     if (!metadata?.userId) {
       await mongoSession.abortTransaction();
       mongoSession.endSession();
@@ -125,12 +129,30 @@ export const handleMembershipCheckout = async (
       }
     }
 
+    // If autoRenew is false, update Stripe subscription to cancel at period end
+    if (
+      !autoRenew &&
+      stripeSubscriptionId &&
+      stripeSubscriptionId.startsWith('sub_')
+    ) {
+      try {
+        await stripe.subscriptions.update(stripeSubscriptionId, {
+          cancel_at_period_end: true,
+        });
+      } catch (err) {
+        console.error(
+          '[Membership Checkout] Error setting cancel_at_period_end on Stripe:',
+          err,
+        );
+      }
+    }
+
     // Accurately determine if this specific purchase received a trial from Stripe
     const isTrial = stripeSubscription
       ? stripeSubscription.status === 'trialing' ||
         Boolean(
           stripeSubscription.trial_end &&
-            stripeSubscription.trial_end * 1000 > Date.now(),
+          stripeSubscription.trial_end * 1000 > Date.now(),
         )
       : Boolean(
           membership?.has_trial && (membership?.trial_period_days || 0) > 0,
@@ -158,6 +180,8 @@ export const handleMembershipCheckout = async (
       const intervalCount = membership.interval || 1;
       if (membership.recurring === 'year') {
         endDate.setFullYear(endDate.getFullYear() + intervalCount);
+      } else if (membership.recurring === 'week') {
+        endDate.setDate(endDate.getDate() + 7 * intervalCount);
       } else {
         endDate.setMonth(endDate.getMonth() + intervalCount);
       }
@@ -170,8 +194,8 @@ export const handleMembershipCheckout = async (
           user: user._id,
           plan: membership._id,
           name: membership.name,
-          recuring: membership.recurring === 'year' ? 'year' : 'month',
-          status: 'active',
+          recuring: membership.recurring || 'month',
+          status: autoRenew ? 'active' : 'cancel-pending',
           start_date: startDate,
           end_date: endDate,
           price: membership.price,
@@ -181,6 +205,7 @@ export const handleMembershipCheckout = async (
           is_trial: isTrial,
           trial_period_days: trialDays,
           trial_end_date: trialEndDate,
+          auto_renew: autoRenew,
         },
       ],
       { session: mongoSession },
@@ -252,6 +277,7 @@ export const handleMembershipCheckout = async (
             startDate: formattedStartDate,
             endDate: formattedEndDate,
             features: planFeatures,
+            autoRenew,
             transactionId: stripeSubscriptionId,
           });
         await emailHelper.sendEmail(userEmailData);
@@ -291,6 +317,7 @@ export const handleMembershipCheckout = async (
           startDate: formattedStartDate,
           endDate: formattedEndDate,
           features: planFeatures,
+          autoRenew,
           transactionId: stripeSubscriptionId,
         });
         await emailHelper.sendEmail(adminEmailData);
@@ -304,11 +331,29 @@ export const handleMembershipCheckout = async (
 
     await mongoSession.commitTransaction();
     mongoSession.endSession();
-  } catch (error) {
+    return;
+  } catch (error: any) {
     if (mongoSession.inTransaction()) {
       await mongoSession.abortTransaction();
     }
     mongoSession.endSession();
+
+    const isWriteConflict =
+      error?.code === 112 ||
+      error?.codeName === 'WriteConflict' ||
+      error?.errorLabels?.has?.('TransientTransactionError') ||
+      error?.errorLabels?.includes?.('TransientTransactionError');
+
+    if (isWriteConflict && attempt < maxRetries) {
+      console.warn(
+        `[Membership Checkout] Write conflict encountered (attempt ${attempt}/${maxRetries}), retrying...`,
+      );
+      await new Promise(resolve => setTimeout(resolve, 250 * attempt));
+      continue;
+    }
+
     console.error('[Membership Checkout Error]:', error);
+    break;
   }
+}
 };

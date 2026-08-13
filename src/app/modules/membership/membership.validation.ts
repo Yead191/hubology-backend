@@ -18,7 +18,7 @@ const createMembershipZodSchema = z.object({
             invalid_type_error: 'Price must be a number'
         }).min(0, 'Price cannot be negative'),
 
-        recurring: z.enum(['month', 'year']),
+        recurring: z.enum(['week', 'month', 'year']),
         interval_count: z.number({
             invalid_type_error: 'Interval count must be a number',
         }).min(1, 'Interval count cannot be negative').optional(),
@@ -42,7 +42,7 @@ const updateMembershipZodSchema = z.object({
         price: z.number({
             invalid_type_error: 'Price must be a number'
         }).min(0, 'Price cannot be negative').optional(),
-        interval: z.enum(['month', 'year']).optional(),
+        interval: z.enum(['week', 'month', 'year']).optional(),
         interval_count: z.number({
             invalid_type_error: 'Interval count must be a number',
         }).min(1, 'Interval count cannot be negative').optional(),

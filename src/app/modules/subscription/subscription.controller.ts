@@ -6,9 +6,11 @@ import { StatusCodes } from 'http-status-codes';
 
 const subscribePackage = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    const auto_renew = req.body?.auto_renew ?? true;
     const result = await SubscriptionServices.subscribePackage(
       req.user,
       req.params.id,
+      auto_renew,
     );
     sendResponse(res, {
       statusCode: StatusCodes.OK,
@@ -61,15 +63,17 @@ const cancelSubscription = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const checkTrialEligibility = catchAsync(async (req: Request, res: Response) => {
-  const result = await SubscriptionServices.checkTrialEligibility(req.user);
-  return sendResponse(res, {
-    statusCode: StatusCodes.OK,
-    success: true,
-    message: 'Trial eligibility status retrieved successfully!',
-    data: result,
-  });
-});
+const checkTrialEligibility = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await SubscriptionServices.checkTrialEligibility(req.user);
+    return sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: 'Trial eligibility status retrieved successfully!',
+      data: result,
+    });
+  },
+);
 
 export const SubscriptionController = {
   subscribePackage,

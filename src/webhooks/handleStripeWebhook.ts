@@ -47,11 +47,7 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
         }
         break;
       case 'customer.subscription.created':
-        const subscriptionCreatedSession = event.data
-          .object as Stripe.Subscription;
-        if (subscriptionCreatedSession.metadata?.membershipId) {
-          await handleMembershipCheckout(subscriptionCreatedSession as any);
-        }
+        // Membership checkout is handled on 'checkout.session.completed' to prevent duplicate execution & Mongo WriteConflicts
         break;
 
       case 'invoice.payment_succeeded':

@@ -97,6 +97,7 @@ export type IMembershipSubscriptionUserConfirmation = {
   startDate?: string;
   endDate?: string;
   features?: string[];
+  autoRenew?: boolean;
   transactionId?: string;
 };
 
@@ -114,6 +115,7 @@ export type IAdminMembershipNotification = {
   startDate?: string;
   endDate?: string;
   features?: string[];
+  autoRenew?: boolean;
   transactionId?: string;
 };
 
