@@ -9,6 +9,8 @@ import { IUser } from '../user/user.interface';
 import { emailHelper } from '../../../helpers/emailHelper';
 import { emailTemplate } from '../../../shared/emailTemplate';
 import unlinkFile from '../../../shared/unlinkFile';
+import generateOTP from '../../../util/generateOTP';
+import { NotificationServices } from '../notification/notification.service';
 
 const getVendorsFromDB = async (
   user: JwtPayload,
@@ -133,6 +135,71 @@ const changeVendorStatus = async (id: string, payload: Pick<IUser, any>) => {
   return result;
 };
 
+const createVendorByAdmin = async (payload: any) => {
+  const payloadData = payload.body || payload;
+  const email = payloadData.email || payload.email;
+  const image = payload.image || payloadData.image;
+  const rawPassword = payloadData.password || payload.password;
+
+  try {
+    const isExist = await User.isExistUserByEmail(email);
+    if (isExist) {
+      if (image) {
+        unlinkFile(image);
+      }
+      if (isExist.status === 'blocked') {
+        throw new ApiError(
+          StatusCodes.BAD_REQUEST,
+          'Account associated with this email is deactivated.',
+        );
+      }
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        'Vendor with this email already exists!',
+      );
+    }
+
+    const createVendor = await User.create({
+      ...payload,
+      role: USER_ROLES.VENDOR,
+      status: payload.status || 'active',
+      verified: payload.verified ?? true,
+    });
+
+    if (!createVendor) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create vendor');
+    }
+
+    NotificationServices.sendNotificationToAdmins({
+      title: 'New Vendor Created',
+      message: `${createVendor.name} has been created as a Vendor by Admin`,
+      refId: createVendor._id,
+      path: `/vendor/profile/${createVendor._id}`,
+    });
+
+    // Send credentials email to vendor
+    if (createVendor.email) {
+      try {
+        const credentialsTemplate = emailTemplate.vendorCredentials({
+          name: createVendor.name,
+          email: createVendor.email,
+          password: rawPassword,
+        });
+        await emailHelper.sendEmail(credentialsTemplate);
+      } catch (emailErr) {
+        console.error('Failed to send vendor credentials email:', emailErr);
+      }
+    }
+
+    return createVendor;
+  } catch (error) {
+    if (image) {
+      unlinkFile(image);
+    }
+    throw error;
+  }
+};
+
 const deleteVendorService = async (id: string) => {
   const isExistVendor = await User.findById(id);
   if (!isExistVendor) {
@@ -146,6 +213,7 @@ const deleteVendorService = async (id: string) => {
 };
 
 export const VendorService = {
+  createVendorByAdmin,
   getVendorsFromDB,
   getSingleVendorFromDB,
   changeVendorStatus,

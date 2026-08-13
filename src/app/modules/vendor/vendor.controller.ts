@@ -3,6 +3,31 @@ import catchAsync from '../../../shared/catchAsync';
 import { VendorService } from './vendor.service';
 import sendResponse from '../../../shared/sendResponse';
 import { StatusCodes } from 'http-status-codes';
+import { getSingleFilePath } from '../../../shared/getFilePath';
+
+const createVendorByAdmin = catchAsync(async (req: Request, res: Response) => {
+  const image = getSingleFilePath(req.files, 'image');
+  const data = { ...req.body };
+  if (image) {
+    data.image = image;
+  }
+  if (req?.body?.vendorProfile && typeof req.body.vendorProfile === 'string') {
+    try {
+      data.vendorProfile = JSON.parse(req.body.vendorProfile);
+    } catch (err) {
+      // If already an object or unparseable, leave as is
+    }
+  }
+
+  const result = await VendorService.createVendorByAdmin(data);
+
+  return sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Vendor created successfully by Admin.',
+    data: result,
+  });
+});
 
 const getAllVendors = catchAsync(async (req: Request, res: Response) => {
   const user = req.user;
@@ -54,6 +79,7 @@ const deleteVendor = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const VendorController = {
+  createVendorByAdmin,
   getAllVendors,
   getSingleVendor,
   changeVendorStatus,

@@ -171,7 +171,7 @@ export const developerProfileSchema = z.object({
     .array(z.string())
     .min(1, 'Select at least one consultation type'),
 
-  applicationStatus: z.enum(['pending', 'approved', 'rejected']),
+  applicationStatus: z.enum(['pending', 'approved', 'rejected']).optional(),
 });
 
 export const AuthValidation = {

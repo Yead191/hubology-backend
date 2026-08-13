@@ -13,7 +13,10 @@ import {
   adminOrderNotification,
   orderStatusUpdate,
 } from '../templates/orderTemplate';
-import { vendorStatusUpdate } from '../templates/vendorTemplate';
+import {
+  vendorStatusUpdate,
+  vendorCredentials,
+} from '../templates/vendorTemplate';
 import {
   serviceBookingUserConfirmation,
   serviceBookingAdminNotification,
@@ -41,6 +44,7 @@ export const emailTemplate = {
   adminOrderNotification,
   orderStatusUpdate,
   vendorStatusUpdate,
+  vendorCredentials,
   serviceBookingUserConfirmation,
   serviceBookingAdminNotification,
   inquiryUserConfirmation,

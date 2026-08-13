@@ -205,3 +205,9 @@ export type ISubscriptionCancelled = {
   cancelType: 'end_of_period' | 'immediate';
   endDate?: string;
 };
+
+export type IVendorCredentials = {
+  name: string;
+  email: string;
+  password?: string;
+};

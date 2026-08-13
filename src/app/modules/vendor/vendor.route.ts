@@ -3,7 +3,20 @@ import auth from '../../middlewares/auth';
 import { VendorController } from './vendor.controller';
 import { USER_ROLES } from '../../../enums/user';
 import tempAuth from '../../middlewares/tempAuth';
+import fileUploadHandler from '../../middlewares/fileUploadHandler';
+import validateRequest from '../../middlewares/validateRequest';
+import { AuthValidation } from '../auth/auth.validation';
+
 const router = express.Router();
+
+router
+  .route('/create')
+  .post(
+    auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+    fileUploadHandler(),
+    validateRequest(AuthValidation.createRegisterVendorZodSchema),
+    VendorController.createVendorByAdmin,
+  );
 
 router.route('/').get(tempAuth(), VendorController.getAllVendors);
 router
