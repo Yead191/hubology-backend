@@ -9,8 +9,9 @@ import { IUser } from '../user/user.interface';
 import { emailHelper } from '../../../helpers/emailHelper';
 import { emailTemplate } from '../../../shared/emailTemplate';
 import unlinkFile from '../../../shared/unlinkFile';
-import generateOTP from '../../../util/generateOTP';
 import { NotificationServices } from '../notification/notification.service';
+
+import { Subscription } from '../subscription/subscription.model';
 
 const getVendorsFromDB = async (
   user: JwtPayload,
@@ -32,6 +33,10 @@ const getVendorsFromDB = async (
       .filter(['availability', 'hourlyRateRange'])
       .fields();
   } else {
+    const validSubscriptionIds = await Subscription.find({
+      status: { $in: ['active', 'cancel-pending'] },
+    }).distinct('_id');
+
     vendorQuery = new QueryBuilder(
       User.find({
         role: USER_ROLES.VENDOR,
@@ -39,7 +44,7 @@ const getVendorsFromDB = async (
         status: 'active',
         $or: [
           { 'vendorProfile.isProfileVisible': true },
-          { subscription: { $ne: null } },
+          { subscription: { $in: validSubscriptionIds } },
         ],
       }).populate('subscription', 'name status'),
       query,
