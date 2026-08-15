@@ -6,7 +6,6 @@ import { USER_ROLES } from '../../../enums/user';
 import ApiError from '../../../errors/ApiError';
 import { IUser, IVendorProfile, UserModal } from './user.interface';
 
-
 const VendorProfileSchema = new Schema<IVendorProfile>(
   {
     jobTitle: {
@@ -56,6 +55,10 @@ const VendorProfileSchema = new Schema<IVendorProfile>(
       enum: ['pending', 'approved', 'rejected'],
       default: 'pending',
     },
+    isProfileVisible: {
+      type: Boolean,
+      default: false,
+    },
 
     approvedAt: Date,
 
@@ -63,7 +66,7 @@ const VendorProfileSchema = new Schema<IVendorProfile>(
   },
   {
     _id: false,
-  }
+  },
 );
 
 const userSchema = new Schema<IUser, UserModal>(
@@ -76,7 +79,7 @@ const userSchema = new Schema<IUser, UserModal>(
       type: String,
       enum: Object.values(USER_ROLES),
       required: true,
-      default: USER_ROLES.USER
+      default: USER_ROLES.USER,
     },
     email: {
       type: String,
@@ -96,12 +99,12 @@ const userSchema = new Schema<IUser, UserModal>(
     },
     status: {
       type: String,
-      enum: ['active', 'blocked', 'rejected', 'pending',],
+      enum: ['active', 'blocked', 'rejected', 'pending'],
       default: 'active',
     },
     rejectionReason: {
       type: String,
-      default: ''
+      default: '',
     },
     verified: {
       type: Boolean,
@@ -115,7 +118,7 @@ const userSchema = new Schema<IUser, UserModal>(
     company: {
       type: String,
       trim: true,
-      required: false
+      required: false,
     },
 
     subscription: {
@@ -149,7 +152,7 @@ const userSchema = new Schema<IUser, UserModal>(
       select: 0,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 //exist user check
@@ -166,7 +169,7 @@ userSchema.statics.isExistUserByEmail = async (email: string) => {
 //is match password
 userSchema.statics.isMatchPassword = async (
   password: string,
-  hashPassword: string
+  hashPassword: string,
 ): Promise<boolean> => {
   return await bcrypt.compare(password, hashPassword);
 };
@@ -182,7 +185,7 @@ userSchema.pre('save', async function (this: any, next) {
   //password hash
   this.password = await bcrypt.hash(
     this.password,
-    Number(config.bcrypt_salt_rounds)
+    Number(config.bcrypt_salt_rounds),
   );
   next();
 });

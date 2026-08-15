@@ -17,6 +17,7 @@ export interface IVendorProfile {
   applicationStatus: 'pending' | 'approved' | 'rejected';
   approvedAt?: Date;
   rejectedReason?: string;
+  isProfileVisible?: boolean;
 }
 
 export interface IUser {
@@ -31,7 +32,7 @@ export interface IUser {
   verified: boolean;
 
   status: 'active' | 'blocked' | 'rejected' | 'pending';
-  rejectionReason?: string
+  rejectionReason?: string;
 
   mustChangePassword: boolean;
 

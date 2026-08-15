@@ -2,6 +2,7 @@ import config from '../config';
 import {
   IVendorStatusUpdate,
   IVendorCredentials,
+  IVendorProfileVisibilityUpdate,
 } from '../types/emailTamplate';
 
 const getLogoUrl = () => {
@@ -188,6 +189,81 @@ export const vendorCredentials = (values: IVendorCredentials) => {
             <td align="center" style="background-color: #f9fafb; padding: 30px 20px; border-top: 1px solid #e5e7eb; text-align: center;">
               <p style="font-size: 12px; color: #9ca3af; margin: 0 0 10px 0; line-height: 1.5;">
                 This is an automated vendor account creation email. Please do not reply directly to this email.
+              </p>
+              <p style="font-size: 12px; color: #9ca3af; margin: 0; line-height: 1.5;">
+                &copy; ${new Date().getFullYear()} Hubology. All rights reserved.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+    `,
+  };
+};
+
+export const vendorProfileVisibilityUpdate = (
+  values: IVendorProfileVisibilityUpdate,
+) => {
+  const logoUrl = getLogoUrl();
+  const visibilityText = values.isProfileVisible ? 'Visible' : 'Hidden';
+  const badgeStyle = values.isProfileVisible
+    ? 'background-color: #d1fae5; color: #065f46;'
+    : 'background-color: #fef3c7; color: #92400e;';
+
+  const detailMessage = values.isProfileVisible
+    ? 'Your vendor profile has been made <strong>visible</strong> on the public directory by the administrator. Clients can now view your services and profile details.'
+    : 'Your vendor profile visibility has been set to <strong>hidden</strong> by the administrator. Your profile will temporarily not appear in public vendor listings.';
+
+  return {
+    to: values.email,
+    subject: `Vendor Profile Visibility Updated: ${visibilityText}`,
+    html: `
+<body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f6f8; margin: 0; padding: 40px 0; color: #333333; -webkit-font-smoothing: antialiased;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f6f8;">
+    <tr>
+      <td align="center">
+        <table width="100%" max-width="600" border="0" cellspacing="0" cellpadding="0" style="width: 100%; max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin: 30px auto;">
+          <!-- Header/Logo Section -->
+          <tr>
+            <td align="center" style="background-color: #0D1026; padding: 35px 20px; border-bottom: 4px solid #bba15c;">
+              <img src="${logoUrl}" alt="Hubology Logo" style="display: block; width: 180px; height: auto;" />
+            </td>
+          </tr>
+          <!-- Body Content -->
+          <tr>
+            <td style="padding: 40px 40px 30px 40px;">
+              <h1 style="color: #173616; font-size: 22px; font-weight: 700; margin: 0 0 20px 0; text-align: center;">
+                Profile Visibility Update
+              </h1>
+              <p style="font-size: 16px; line-height: 1.6; color: #4b5563; margin: 0 0 20px 0;">
+                Dear <strong>${values.name}</strong>,
+              </p>
+              <p style="font-size: 16px; line-height: 1.6; color: #4b5563; margin: 0 0 24px 0;">
+                ${detailMessage}
+              </p>
+              
+              <!-- Visibility Status Box -->
+              <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px; text-align: center; margin-bottom: 24px;">
+                <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #6b7280; margin: 0 0 10px 0;">Current Directory Visibility</p>
+                <span style="display: inline-block; padding: 8px 24px; font-size: 18px; font-weight: bold; border-radius: 50px; ${badgeStyle}">
+                  ${visibilityText}
+                </span>
+              </div>
+
+              <p style="font-size: 16px; line-height: 1.6; color: #4b5563; margin: 28px 0 0 0;">
+                Best regards,<br />
+                <strong>The Hubology Team</strong>
+              </p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="background-color: #f9fafb; padding: 30px 20px; border-top: 1px solid #e5e7eb; text-align: center;">
+              <p style="font-size: 12px; color: #9ca3af; margin: 0 0 10px 0; line-height: 1.5;">
+                This is an automated administrative notification. Please do not reply directly to this email.
               </p>
               <p style="font-size: 12px; color: #9ca3af; margin: 0; line-height: 1.5;">
                 &copy; ${new Date().getFullYear()} Hubology. All rights reserved.

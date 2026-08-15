@@ -37,8 +37,11 @@ const getVendorsFromDB = async (
         role: USER_ROLES.VENDOR,
         verified: true,
         status: 'active',
-        subscription: { $ne: null },
-      }),
+        $or: [
+          { 'vendorProfile.isProfileVisible': true },
+          { subscription: { $ne: null } },
+        ],
+      }).populate('subscription', 'name status'),
       query,
     )
       .paginate()
@@ -212,10 +215,46 @@ const deleteVendorService = async (id: string) => {
   return result;
 };
 
+const changeProfileVisibility = async (
+  id: string,
+  isProfileVisible: boolean,
+) => {
+  const vendor = await User.findById(id);
+  if (!vendor) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Vendor doesn't exist!");
+  }
+  if (vendor.role !== USER_ROLES.VENDOR) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'This is not a vendor profile');
+  }
+  const result = await User.updateOne(
+    { _id: id },
+    { $set: { 'vendorProfile.isProfileVisible': isProfileVisible } },
+  );
+
+  if (vendor.email && isProfileVisible) {
+    try {
+      const emailData = emailTemplate.vendorProfileVisibilityUpdate({
+        email: vendor.email,
+        name: vendor.name || 'Vendor',
+        isProfileVisible,
+      });
+      await emailHelper.sendEmail(emailData);
+    } catch (emailErr) {
+      console.error(
+        'Failed to send vendor profile visibility update email:',
+        emailErr,
+      );
+    }
+  }
+
+  return result;
+};
+
 export const VendorService = {
   createVendorByAdmin,
   getVendorsFromDB,
   getSingleVendorFromDB,
   changeVendorStatus,
   deleteVendorService,
+  changeProfileVisibility,
 };

@@ -6,6 +6,7 @@ import tempAuth from '../../middlewares/tempAuth';
 import fileUploadHandler from '../../middlewares/fileUploadHandler';
 import validateRequest from '../../middlewares/validateRequest';
 import { AuthValidation } from '../auth/auth.validation';
+import { UserValidation } from '../user/user.validation';
 
 const router = express.Router();
 
@@ -19,13 +20,7 @@ router
   );
 
 router.route('/').get(tempAuth(), VendorController.getAllVendors);
-router
-  .route('/:id')
-  .get(VendorController.getSingleVendor)
-  .delete(
-    auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
-    VendorController.deleteVendor,
-  );
+
 router
   .route('/change-status/:id')
   .patch(
@@ -33,4 +28,18 @@ router
     VendorController.changeVendorStatus,
   );
 
+router
+  .route('/change-profile-visibility/:id')
+  .patch(
+    auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+    validateRequest(UserValidation.updateProfileVisibilityZodSchema),
+    VendorController.changeProfileVisibility,
+  );
+router
+  .route('/:id')
+  .get(VendorController.getSingleVendor)
+  .delete(
+    auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+    VendorController.deleteVendor,
+  );
 export const VendorRoutes = router;

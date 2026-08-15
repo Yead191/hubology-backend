@@ -18,7 +18,16 @@ const updateUserZodSchema = z.object({
   image: z.string().optional(),
 });
 
+const updateProfileVisibilityZodSchema = z.object({
+  body: z.object({
+    isProfileVisible: z.boolean({
+      required_error: 'isProfileVisible is required',
+    }),
+  }),
+});
+
 export const UserValidation = {
   createUserZodSchema,
   updateUserZodSchema,
+  updateProfileVisibilityZodSchema,
 };

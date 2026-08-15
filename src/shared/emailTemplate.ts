@@ -16,6 +16,7 @@ import {
 import {
   vendorStatusUpdate,
   vendorCredentials,
+  vendorProfileVisibilityUpdate,
 } from '../templates/vendorTemplate';
 import {
   serviceBookingUserConfirmation,
@@ -45,6 +46,7 @@ export const emailTemplate = {
   orderStatusUpdate,
   vendorStatusUpdate,
   vendorCredentials,
+  vendorProfileVisibilityUpdate,
   serviceBookingUserConfirmation,
   serviceBookingAdminNotification,
   inquiryUserConfirmation,

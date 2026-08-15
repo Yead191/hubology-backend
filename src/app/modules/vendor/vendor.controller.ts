@@ -78,10 +78,28 @@ const deleteVendor = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const changeProfileVisibility = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { isProfileVisible } = req.body;
+    const result = await VendorService.changeProfileVisibility(
+      id,
+      isProfileVisible,
+    );
+    return sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'Vendor profile visibility changed successfully!',
+      data: result,
+    });
+  },
+);
+
 export const VendorController = {
   createVendorByAdmin,
   getAllVendors,
   getSingleVendor,
   changeVendorStatus,
   deleteVendor,
+  changeProfileVisibility,
 };

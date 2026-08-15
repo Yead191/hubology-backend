@@ -211,3 +211,9 @@ export type IVendorCredentials = {
   email: string;
   password?: string;
 };
+
+export type IVendorProfileVisibilityUpdate = {
+  email: string;
+  name: string;
+  isProfileVisible: boolean;
+};
