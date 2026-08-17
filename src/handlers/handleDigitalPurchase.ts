@@ -4,6 +4,7 @@ import { Product } from '../app/modules/book/book.model';
 import { Digital } from '../app/modules/digital/digital.model';
 import { User } from '../app/modules/user/user.model';
 import { Transaction } from '../app/modules/transaction/transaction.model';
+import { Coupon, CouponUser } from '../app/modules/coupon/coupon.model';
 import {
   TRANSACTION_CATEGORY,
   TRANSACTION_STATUS,
@@ -25,6 +26,7 @@ export const handleDigitalPurchase = async (
 
     const userId = payload?.metadata?.userId;
     const productId = payload?.metadata?.productId;
+    const couponCode = payload?.metadata?.coupon || '';
 
     if (!userId || !productId) {
       throw new Error('Missing userId or productId in metadata');
@@ -45,6 +47,52 @@ export const handleDigitalPurchase = async (
       throw new Error('User not found!');
     }
 
+    const originalPrice = payload?.amount_subtotal
+      ? payload.amount_subtotal / 100
+      : Number(productInfo.price) || 0;
+    const amountPaid = payload?.amount_total
+      ? payload.amount_total / 100
+      : originalPrice;
+    let discountAmount = payload?.total_details?.amount_discount
+      ? payload.total_details.amount_discount / 100
+      : originalPrice > amountPaid
+        ? originalPrice - amountPaid
+        : 0;
+
+    let discountPercentage = 0;
+    let couponDoc: any = null;
+
+    if (couponCode) {
+      couponDoc = await Coupon.findOne({ coupon_code: couponCode }).session(
+        session,
+      );
+
+      if (couponDoc) {
+        if (couponDoc.type === 'percentage') {
+          discountPercentage = couponDoc.amount;
+          if (!discountAmount) {
+            discountAmount = (originalPrice * couponDoc.amount) / 100;
+          }
+        } else if (couponDoc.type === 'fixed') {
+          discountPercentage = 0;
+          if (!discountAmount) {
+            discountAmount = couponDoc.amount;
+          }
+        }
+
+        // Track user's coupon usage and increment total_uses
+        await CouponUser.create(
+          [
+            {
+              coupon: couponDoc._id,
+              user: user._id,
+            },
+          ],
+          { session },
+        );
+      }
+    }
+
     const paymentTxnId = (payload?.payment_intent as string) || payload.id;
 
     // 1. Create Digital Record
@@ -54,7 +102,7 @@ export const handleDigitalPurchase = async (
           {
             user: user._id,
             product: productInfo._id,
-            price: Number(productInfo.price),
+            price: amountPaid,
             paymentStatus: 'paid',
             paymentIntentId: paymentTxnId,
           },
@@ -69,8 +117,10 @@ export const handleDigitalPurchase = async (
         [
           {
             user: user._id,
-            total_price: Number(productInfo.price),
-            payment_received: Number(productInfo.price),
+            total_price: originalPrice,
+            payment_received: amountPaid,
+            discount_amount: discountAmount,
+            discount_percentage: discountPercentage,
             status: TRANSACTION_STATUS.SUCCESS,
             type: TRANSACTION_TYPE.CREDIT,
             category: TRANSACTION_CATEGORY.SHOP,
@@ -92,7 +142,7 @@ export const handleDigitalPurchase = async (
           title: 'Digital Product Purchased',
           message: `Your purchase of "${productInfo.title}" was successful!`,
           refId: digitalRecord._id,
-          path: '/digital',
+          path: '/dashboard/digital',
         });
       } catch (notifErr) {
         console.error(
@@ -105,9 +155,9 @@ export const handleDigitalPurchase = async (
     try {
       await NotificationServices.sendNotificationToAdmins({
         title: 'New Digital Product Purchase',
-        message: `${user.name || 'A customer'} purchased "${productInfo.title}" ($${productInfo.price}).`,
+        message: `${user.name || 'A customer'} purchased "${productInfo.title}" ($${amountPaid}).`,
         refId: digitalRecord._id,
-        path: '/digital',
+        path: '/transactions',
       });
     } catch (notifErr) {
       console.error(
@@ -128,11 +178,15 @@ export const handleDigitalPurchase = async (
             {
               title: productInfo.title,
               quantity: 1,
-              unit_price: Number(productInfo.price),
-              total_price: Number(productInfo.price),
+              unit_price: originalPrice,
+              total_price: originalPrice,
             },
           ],
-          totalPrice: Number(productInfo.price),
+          productsPrice: originalPrice,
+          originalPrice: originalPrice,
+          couponCode: couponCode || undefined,
+          discountAmount: discountAmount || undefined,
+          totalPrice: amountPaid,
           formattedAddress: 'Digital Access',
         });
         await emailHelper.sendEmail(userEmailData);
@@ -170,11 +224,15 @@ export const handleDigitalPurchase = async (
             {
               title: productInfo.title,
               quantity: 1,
-              unit_price: Number(productInfo.price),
-              total_price: Number(productInfo.price),
+              unit_price: originalPrice,
+              total_price: originalPrice,
             },
           ],
-          totalPrice: Number(productInfo.price),
+          productsPrice: originalPrice,
+          originalPrice: originalPrice,
+          couponCode: couponCode || undefined,
+          discountAmount: discountAmount || undefined,
+          totalPrice: amountPaid,
           formattedAddress: 'Digital Access',
         });
         await emailHelper.sendEmail(adminEmailData);

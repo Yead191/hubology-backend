@@ -107,9 +107,11 @@ const deleteBook = catchAsync(async (req: Request, res: Response) => {
 
 const purchaseSingleProduct = catchAsync(
   async (req: Request, res: Response) => {
+    const { coupon } = req.body;
     const result = await BookServices.purchaseSingleProduct(
       req.user,
       req.params.id,
+      coupon,
     );
     return sendResponse(res, {
       success: true,

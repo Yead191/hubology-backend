@@ -9,6 +9,7 @@ import { JwtPayload } from 'jsonwebtoken';
 import stripe from '../../../config/stripe';
 import config from '../../../config';
 import { Digital } from '../digital/digital.model';
+import { Coupon } from '../coupon/coupon.model';
 
 const createBook = async (data: IProduct) => {
   const result = await Product.create(data);
@@ -82,21 +83,27 @@ const deleteBook = async (id: string) => {
   return result;
 };
 
-const purchaseSingleProduct = async (user: JwtPayload, id: string) => {
-  console.log(id);
+const purchaseSingleProduct = async (
+  user: JwtPayload,
+  id: string,
+  couponCode: string,
+) => {
   const product = await Product.findById(id).lean();
   if (!product) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found!');
   }
 
   const isBought = await Digital.findOne({ user: user.id, product: id });
-  // console.log(isBought);
-  // console.log(isBought);
   if (isBought) {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
       'You already bought this product!',
     );
+  }
+
+  let coupon = null;
+  if (couponCode) {
+    coupon = await Coupon.checkCoupon(couponCode, user.id, product.price);
   }
 
   const imageUrl = product.image
@@ -129,7 +136,17 @@ const purchaseSingleProduct = async (user: JwtPayload, id: string) => {
       userId: user?.id!.toString(),
       productId: product._id.toString(),
       type: 'digital-shop',
+      coupon: couponCode || '',
     },
+    ...(couponCode
+      ? {
+          discounts: [
+            {
+              coupon: coupon?.stripe_coupon_code,
+            },
+          ],
+        }
+      : {}),
   });
 
   if (!session.url) {
