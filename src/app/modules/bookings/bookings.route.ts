@@ -21,6 +21,10 @@ router
   .patch(
     auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
     BookingsController.updateBookingStatus,
+  )
+  .delete(
+    auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+    BookingsController.deleteBooking,
   );
 
 export const BookingsRoutes = router;

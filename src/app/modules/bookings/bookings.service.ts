@@ -130,8 +130,21 @@ const updateBookingStatus = async (id: string, payload: { status: string }) => {
   return result;
 };
 
+const deleteBooking = async (id: string) => {
+  const booking = await Bookings.findById(id, { paymentStatus: 1 }).lean();
+  if (!booking) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Booking not found!');
+  }
+  const result = await Bookings.findOneAndDelete({ _id: id });
+  if (!result) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Booking not deleted!');
+  }
+  return result;
+};
+
 export const BookingsServices = {
   bookingServiceIntoDB,
   getAllBookings,
   updateBookingStatus,
+  deleteBooking,
 };
