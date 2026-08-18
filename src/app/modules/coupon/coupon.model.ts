@@ -8,55 +8,58 @@ import {
 import ApiError from '../../../errors/ApiError';
 import { StatusCodes } from 'http-status-codes';
 
-const couponSchema = new Schema<ICoupon, CouponModel>({
-  coupon_code: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
+const couponSchema = new Schema<ICoupon, CouponModel>(
+  {
+    coupon_code: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+    stripe_coupon_code: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    type: {
+      type: String,
+      enum: ['percentage', 'fixed'],
+      required: true,
+    },
+    amount: {
+      type: Number,
+      required: true,
+    },
+    max_use: {
+      type: Number,
+      default: 0,
+    },
+    total_uses: {
+      type: Number,
+      default: 0,
+    },
+    status: {
+      type: String,
+      enum: ['active', 'inactive', 'expired'],
+      default: 'active',
+    },
+    start_date: {
+      type: Date,
+      default: Date.now,
+    },
+    end_date: {
+      type: Date,
+      default: Date.now,
+    },
   },
-  stripe_coupon_code: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-  },
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  type: {
-    type: String,
-    enum: ['percentage', 'fixed'],
-    required: true,
-  },
-  amount: {
-    type: Number,
-    required: true,
-  },
-  max_use: {
-    type: Number,
-    default: 0,
-  },
-  total_uses: {
-    type: Number,
-    default: 0,
-  },
-  status: {
-    type: String,
-    enum: ['active', 'inactive', 'expired'],
-    default: 'active',
-  },
-  start_date: {
-    type: Date,
-    default: Date.now,
-  },
-  end_date: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  { timestamps: true },
+);
 
 couponSchema.statics.checkCoupon = async function (
   couponCode: string,

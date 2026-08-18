@@ -44,7 +44,7 @@ const updateCoupon = async (id: string, payload: Partial<ICoupon>) => {
 };
 
 const deleteCoupon = async (id: string) => {
-  const existCoupon = await Coupon.findById(id);
+  const existCoupon = await Coupon.findById(id).lean();
   if (!existCoupon) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Coupon not found');
   }
