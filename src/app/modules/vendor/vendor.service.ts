@@ -19,6 +19,16 @@ const getVendorsFromDB = async (
 ) => {
   let vendorQuery;
 
+  const searchableFields = [
+    'name',
+    'email',
+    'company',
+    'vendorProfile.company',
+    'vendorProfile.jobTitle',
+    'vendorProfile.bio',
+    'vendorProfile.expertise',
+  ];
+
   if (
     user?.role === USER_ROLES.ADMIN ||
     user?.role === USER_ROLES.SUPER_ADMIN
@@ -27,10 +37,10 @@ const getVendorsFromDB = async (
       User.find({ role: USER_ROLES.VENDOR }).populate('subscription'),
       query,
     )
-      .paginate()
+      .search(searchableFields)
+      .filter(['availability', 'hourlyRateRange', 'experienceRange', 'expertise'])
       .sort()
-      .search(['name', 'email', 'company'])
-      .filter(['availability', 'hourlyRateRange'])
+      .paginate()
       .fields();
   } else {
     const validSubscriptionIds = await Subscription.find({
@@ -48,11 +58,27 @@ const getVendorsFromDB = async (
         ],
       }).populate('subscription', 'name status'),
       query,
-    )
-      .paginate()
+    );
+
+    // Apply search via $and to avoid overwriting the base $or condition in Mongoose
+    if (query?.searchTerm) {
+      const searchConditions = {
+        $or: searchableFields.map(field => ({
+          [field]: {
+            $regex: query.searchTerm,
+            $options: 'i',
+          },
+        })),
+      };
+      vendorQuery.modelQuery = vendorQuery.modelQuery.find({
+        $and: [searchConditions],
+      });
+    }
+
+    vendorQuery
+      .filter(['availability', 'hourlyRateRange', 'experienceRange', 'expertise'])
       .sort()
-      .search(['name', 'email', 'company', 'vendorProfile.bio'])
-      .filter(['availability', 'hourlyRateRange'])
+      .paginate()
       .fields();
   }
 
@@ -78,6 +104,21 @@ const getVendorsFromDB = async (
       'vendorProfile.yearsExperience': {
         $gte: min,
         $lte: max,
+      },
+    });
+  }
+  // filter by expertise
+  if (query.expertise) {
+    const expertiseList =
+      typeof query.expertise === 'string'
+        ? query.expertise.split(',').map((item: string) => item.trim())
+        : Array.isArray(query.expertise)
+          ? query.expertise
+          : [query.expertise];
+
+    vendorQuery.modelQuery = vendorQuery.modelQuery.find({
+      'vendorProfile.expertise': {
+        $in: expertiseList.map((exp: string) => new RegExp(exp, 'i')),
       },
     });
   }
