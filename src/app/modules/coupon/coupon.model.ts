@@ -92,14 +92,13 @@ couponSchema.statics.checkCoupon = async function (
   }
 
   if (price) {
-    if (price < coupon.amount) {
+    if (coupon.type === 'fixed' && price < coupon.amount) {
       throw new ApiError(
         StatusCodes.BAD_REQUEST,
         'Coupon is not applicable for this price',
       );
     }
-
-    if (coupon.type == 'percentage') {
+    if (coupon.type === 'percentage') {
       const price_with_discount = price - (price * coupon.amount) / 100;
       return {
         stripe_coupon_code: coupon.stripe_coupon_code,
@@ -109,8 +108,7 @@ couponSchema.statics.checkCoupon = async function (
         orginal_price: price,
       };
     }
-
-    if (coupon.type == 'fixed') {
+    if (coupon.type === 'fixed') {
       const price_with_discount = price - coupon.amount;
       return {
         stripe_coupon_code: coupon.stripe_coupon_code,
