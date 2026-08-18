@@ -10,7 +10,7 @@ const router = express.Router();
 router
   .route('/')
   .post(
-    auth(USER_ROLES.USER),
+    auth(USER_ROLES.USER, USER_ROLES.VENDOR),
     validateRequest(OrderValidations.createOrderZodSchema),
     OrderController.createOrder,
   )
