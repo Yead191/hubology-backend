@@ -149,8 +149,11 @@ const getOrdersFromDB = async (
   const initQuery = [USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN].includes(
     user?.role,
   )
-    ? { payment_status: 'paid' }
-    : { user: user.id, payment_status: 'paid' };
+    ? { payment_status: { $in: ['paid', 'refunded', 'partially_refunded'] } }
+    : {
+        user: user.id,
+        payment_status: { $in: ['paid', 'refunded', 'partially_refunded'] },
+      };
 
   const qb = new QueryBuilder(
     Order.find(initQuery).populate({

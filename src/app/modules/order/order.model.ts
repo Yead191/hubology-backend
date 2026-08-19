@@ -22,7 +22,7 @@ const orderSchema = new Schema<IOrder, OrderModel>(
     },
     payment_status: {
       type: String,
-      enum: ['paid', 'pending'],
+      enum: ['paid', 'pending', 'refunded', 'partially_refunded'],
       default: 'pending',
     },
     transaction_id: {

@@ -217,3 +217,49 @@ export type IVendorProfileVisibilityUpdate = {
   name: string;
   isProfileVisible: boolean;
 };
+
+export type IRefundRequestUserConfirmation = {
+  email: string;
+  name: string;
+  orderId: string;
+  reason: string;
+};
+
+export type IRefundRequestAdminNotification = {
+  adminEmail: string;
+  adminName: string;
+  customerName: string;
+  customerEmail: string;
+  orderId: string;
+  reason: string;
+};
+
+export type IRefundApprovedUserConfirmation = {
+  email: string;
+  name: string;
+  orderId: string;
+  refundType: string;
+  refundAmount: number;
+  stripeRefundId?: string;
+  adminNote?: string;
+};
+
+export type IRefundRejectedUserConfirmation = {
+  email: string;
+  name: string;
+  orderId: string;
+  adminNote?: string;
+};
+
+export type IRefundProcessedAdminNotification = {
+  adminEmail: string;
+  adminName: string;
+  customerName: string;
+  customerEmail: string;
+  orderId: string;
+  refundType: string;
+  refundAmount: number;
+  stripeRefundId?: string;
+  adminNote?: string;
+};
+

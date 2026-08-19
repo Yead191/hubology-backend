@@ -11,6 +11,7 @@ import { handleInvoicePaymentSucceeded } from '../handlers/handleInvoicePaymentS
 import { handleInvoicePaymentFailed } from '../handlers/handleInvoicePaymentFailed';
 import handleSubscriptionDelete from '../handlers/handleSubscriptionDelete';
 import { handleSubscriptionUpdated } from '../handlers/handleSubscriptionUpdated';
+import { handleChargeRefunded } from '../handlers/handleChargeRefunded';
 
 export const handleStripeWebhook = async (req: Request, res: Response) => {
   try {
@@ -68,6 +69,17 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
       case 'customer.subscription.updated':
         const updatedSub = event.data.object as Stripe.Subscription;
         await handleSubscriptionUpdated(updatedSub);
+        break;
+
+      case 'charge.refunded':
+        const refundedCharge = event.data.object as Stripe.Charge;
+        await handleChargeRefunded(refundedCharge);
+        break;
+
+      case 'refund.created':
+      case 'refund.updated':
+        const refundObj = event.data.object as Stripe.Refund;
+        await handleChargeRefunded(refundObj);
         break;
 
       default:

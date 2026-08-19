@@ -33,6 +33,13 @@ import {
   subscriptionPaymentFailed,
   subscriptionCancelled,
 } from '../templates/subscriptionTemplate';
+import {
+  refundRequestUserConfirmation,
+  refundRequestAdminNotification,
+  refundApprovedUserConfirmation,
+  refundRejectedUserConfirmation,
+  refundProcessedAdminNotification,
+} from '../templates/refundTemplate';
 
 export const emailTemplate = {
   createAccount,
@@ -56,4 +63,10 @@ export const emailTemplate = {
   subscriptionPaymentSuccess,
   subscriptionPaymentFailed,
   subscriptionCancelled,
+  refundRequestUserConfirmation,
+  refundRequestAdminNotification,
+  refundApprovedUserConfirmation,
+  refundRejectedUserConfirmation,
+  refundProcessedAdminNotification,
 };
+

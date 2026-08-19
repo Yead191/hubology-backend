@@ -11,7 +11,7 @@ export type IOrder = {
     unit_price: number;
     total_price: number;
   }[];
-  payment_status: 'pending' | 'paid';
+  payment_status: 'pending' | 'paid' | 'refunded' | 'partially_refunded';
   status: ORDER_STATUS;
   order_id: string;
   payment_intent_id?: string;
