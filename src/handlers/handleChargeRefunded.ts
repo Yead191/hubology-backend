@@ -161,6 +161,7 @@ export const processAdminRefund = async (
       const isFullRefund =
         refundType === 'full' || refundAmount >= maxFundableAmount;
       await Order.findByIdAndUpdate(order._id, {
+        refund: refund._id,
         payment_status: isFullRefund ? 'refunded' : 'partially_refunded',
         ...(isFullRefund ? { status: ORDER_STATUS.REFUNDED } : {}),
       });

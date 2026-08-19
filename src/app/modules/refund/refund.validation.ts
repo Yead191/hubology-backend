@@ -16,7 +16,7 @@ const reviewRefundZodSchema = z.object({
       required_error: 'Status is required (refunded or rejected)',
     }),
     refundType: z.enum(['full', 'partial']).optional(),
-    refundAmount: z.number().min(0.01).optional(),
+    refundAmount: z.number().optional(),
     adminNote: z.string().optional(),
   }),
 });
@@ -25,4 +25,3 @@ export const RefundValidations = {
   createRefundZodSchema,
   reviewRefundZodSchema,
 };
-

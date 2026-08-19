@@ -7,11 +7,13 @@ const refundSchema = new Schema<IRefund, RefundModel>(
       type: Schema.Types.ObjectId,
       required: true,
       index: true,
+      ref: 'Order',
     },
     user: {
       type: Schema.Types.ObjectId,
       required: true,
       index: true,
+      ref: 'User',
     },
     reason: {
       type: String,

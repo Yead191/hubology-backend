@@ -75,6 +75,11 @@ const orderSchema = new Schema<IOrder, OrderModel>(
       type: String,
       default: '',
     },
+    refund: {
+      type: Schema.Types.ObjectId,
+      ref: 'Refund',
+      required: false,
+    },
   },
   { timestamps: true },
 );

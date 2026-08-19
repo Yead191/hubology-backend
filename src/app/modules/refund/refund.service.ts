@@ -36,12 +36,6 @@ const createRefundToDB = async (
       );
     }
 
-    if (order.status === ORDER_STATUS.DELIVERD) {
-      throw new ApiError(
-        StatusCodes.BAD_REQUEST,
-        'Refund can not be allowed for delivered order.',
-      );
-    }
     if (!order.payment_intent_id) {
       throw new ApiError(
         StatusCodes.BAD_REQUEST,
@@ -191,11 +185,13 @@ const getAllRefund = async (user: JwtPayload, query: Record<string, any>) => {
       })
       .populate({
         path: 'order',
+        select:
+          'status payment_status order_id price_breakdown total_items contact_number payment_intent_id',
       }),
     query,
   )
     .search(['user', 'order'])
-    .filter(['status', 'refundType'])
+    .filter()
     .sort()
     .paginate()
     .fields();
@@ -209,7 +205,10 @@ const getAllRefund = async (user: JwtPayload, query: Record<string, any>) => {
 
 const getSingleRefund = async (id: string) => {
   const result = await Refund.findById(id)
-    .populate('order')
+    .populate(
+      'order',
+      ' status payment_status order_id price_breakdown total_items contact_number payment_intent_id',
+    )
     .populate('user', 'name email image');
 
   if (!result) {

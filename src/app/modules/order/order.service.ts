@@ -156,10 +156,15 @@ const getOrdersFromDB = async (
       };
 
   const qb = new QueryBuilder(
-    Order.find(initQuery).populate({
-      path: 'user',
-      select: 'name email image',
-    }),
+    Order.find(initQuery)
+      .populate({
+        path: 'user',
+        select: 'name email image',
+      })
+      .populate({
+        path: 'refund',
+        select: 'refundAmount refundType status stripeRefundId adminNote',
+      }),
     query,
   )
     .search([

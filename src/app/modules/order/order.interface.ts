@@ -38,6 +38,7 @@ export type IOrder = {
   };
   contact_number: string;
   total_items?: number;
+  refund?: Types.ObjectId;
 };
 
 export type OrderModel = Model<IOrder>;
