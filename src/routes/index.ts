@@ -27,6 +27,7 @@ import { DisclaimerRoutes } from '../app/modules/disclaimer/disclaimer.route';
 import { FaqRoutes } from '../app/modules/faq/faq.route';
 import { CouponRoutes } from '../app/modules/coupon/coupon.route';
 import { RefundRoutes } from '../app/modules/refund/refund.route';
+import { EventRoutes } from '../app/modules/event/event.route';
 const router = express.Router();
 
 const apiRoutes = [
@@ -138,6 +139,10 @@ const apiRoutes = [
   {
     path: '/refund',
     route: RefundRoutes,
+  },
+  {
+    path: '/event',
+    route: EventRoutes,
   },
 ];
 
