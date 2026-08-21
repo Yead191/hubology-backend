@@ -21,5 +21,9 @@ router
     auth(),
     validateRequest(OrderValidations.changeOrderStatusZodSchema),
     OrderController.changeOrderStatus,
+  )
+  .delete(
+    auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+    OrderController.deleteOrder,
   );
 export const OrderRoutes = router;

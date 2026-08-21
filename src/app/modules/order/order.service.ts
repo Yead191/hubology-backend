@@ -250,8 +250,17 @@ const changeOrderStatus = async (id: string, status: ORDER_STATUS) => {
   return updatedOrder;
 };
 
+const deleteOrder = async (id: string) => {
+  const result = await Order.findByIdAndDelete(id);
+  if (!result) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Order not found');
+  }
+  return result;
+};
+
 export const OrderServices = {
   createOrderToDb,
   getOrdersFromDB,
   changeOrderStatus,
+  deleteOrder,
 };

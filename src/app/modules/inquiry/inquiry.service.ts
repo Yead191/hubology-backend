@@ -62,7 +62,7 @@ const createInquiry = async (payload: any) => {
   }
 
   // Send Notification Email to Admin
-  const adminEmail = config.super_admin.email;
+  const adminEmail = config.support.contact;
   if (adminEmail) {
     try {
       const adminEmailData = emailTemplate.inquiryAdminNotification({

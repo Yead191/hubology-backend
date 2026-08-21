@@ -4,4 +4,5 @@ export enum ORDER_STATUS {
   DELIVERD = 'Deliverd',
   CANCELLED = 'Cancelled',
   REFUNDED = 'Refunded',
+  REFUND_REQUESTED = 'Refund Requested',
 }

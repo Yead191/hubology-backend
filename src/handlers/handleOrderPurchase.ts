@@ -195,17 +195,19 @@ export const handleOrderPurchase = async (
 
     // 4. Email to Admin(s)
     try {
-      const admins = await User.find({
-        $or: [{ role: USER_ROLES.ADMIN }, { role: USER_ROLES.SUPER_ADMIN }],
-      });
+      // const admins = await User.find({
+      //   $or: [{ role: USER_ROLES.ADMIN }, { role: USER_ROLES.SUPER_ADMIN }],
+      // });
 
-      const adminEmails = Array.from(
-        new Set(
-          [...admins.map(a => a.email), config.super_admin.email].filter(
-            Boolean,
-          ),
-        ),
-      );
+      // const adminEmails = Array.from(
+      //   new Set(
+      //     [...admins.map(a => a.email), config.super_admin.email].filter(
+      //       Boolean,
+      //     ),
+      //   ),
+      // );
+
+      const adminEmails = Array.from(new Set([config.support.order]));
 
       for (const adminEmail of adminEmails) {
         const adminEmailData = emailTemplate.adminOrderNotification({

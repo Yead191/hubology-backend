@@ -41,4 +41,8 @@ export default {
   elasticSearch: {
     url: process.env.ELASTICSEARCH_URL,
   },
+  support: {
+    order: process.env.ORDER_SUPPORT_EMAIL,
+    contact: process.env.CONTACT_SUPPORT_EMAIL,
+  },
 };

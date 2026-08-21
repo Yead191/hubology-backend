@@ -28,6 +28,10 @@ router
     auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
     validateRequest(RefundValidations.reviewRefundZodSchema),
     RefundController.reviewRefund,
+  )
+  .delete(
+    auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+    RefundController.deleteRefund,
   );
 
 export const RefundRoutes = router;

@@ -14,4 +14,16 @@ const getTransactions = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-export const TransactionController = { getTransactions };
+const deleteTransaction = catchAsync(async (req: Request, res: Response) => {
+  const result = await TransactionServices.deleteTransactionFromDB(
+    req.params.id,
+  );
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: 'Transaction deleted successfully',
+    data: result,
+  });
+});
+
+export const TransactionController = { getTransactions, deleteTransaction };

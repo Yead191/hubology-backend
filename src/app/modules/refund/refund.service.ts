@@ -72,6 +72,8 @@ const createRefundToDB = async (
       status: 'pending',
     });
 
+    await Order.updateOne({ _id: order._id }, { $set: { refund: result._id } });
+
     const userDoc = await User.findById(user.id);
 
     // 1. In-App Notification to User
@@ -119,17 +121,7 @@ const createRefundToDB = async (
 
     // 4. Admin Email(s)
     try {
-      const admins = await User.find({
-        $or: [{ role: USER_ROLES.ADMIN }, { role: USER_ROLES.SUPER_ADMIN }],
-      });
-
-      const adminEmails = Array.from(
-        new Set(
-          [...admins.map(a => a.email), config.super_admin.email].filter(
-            Boolean,
-          ),
-        ),
-      );
+      const adminEmails = Array.from(new Set([config.support.order]));
 
       for (const adminEmail of adminEmails) {
         const adminEmailData = emailTemplate.refundRequestAdminNotification({
@@ -218,9 +210,23 @@ const getSingleRefund = async (id: string) => {
   return result;
 };
 
+const deleteRefundFromDB = async (id: string) => {
+  const result = await Refund.findByIdAndDelete(id);
+  if (!result) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Refund request not found.');
+  }
+  if (result.images) {
+    for (const img of result.images) {
+      unlinkFile(img);
+    }
+  }
+  return result;
+};
+
 export const RefundServices = {
   createRefundToDB,
   reviewRefundInDB,
   getAllRefund,
   getSingleRefund,
+  deleteRefundFromDB,
 };

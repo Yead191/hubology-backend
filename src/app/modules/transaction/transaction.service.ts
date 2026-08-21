@@ -2,6 +2,8 @@ import { JwtPayload } from 'jsonwebtoken';
 import { USER_ROLES } from '../../../enums/user';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { Transaction } from './transaction.model';
+import ApiError from '../../../errors/ApiError';
+import { StatusCodes } from 'http-status-codes';
 
 const getTransactions = async (
   user: JwtPayload,
@@ -25,4 +27,12 @@ const getTransactions = async (
   ]);
   return { transactions, pagination };
 };
-export const TransactionServices = { getTransactions };
+
+const deleteTransactionFromDB = async (id: string) => {
+  const result = await Transaction.findByIdAndDelete(id);
+  if (!result) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Transaction not found');
+  }
+  return result;
+};
+export const TransactionServices = { getTransactions, deleteTransactionFromDB };

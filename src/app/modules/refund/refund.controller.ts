@@ -58,9 +58,20 @@ const getSingleRefund = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const deleteRefund = catchAsync(async (req: Request, res: Response) => {
+  const result = await RefundServices.deleteRefundFromDB(req.params.id);
+  return sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Refund request deleted successfully',
+    data: result,
+  });
+});
+
 export const RefundController = {
   createRefund,
   reviewRefund,
   getAllRefund,
   getSingleRefund,
+  deleteRefund,
 };

@@ -104,7 +104,12 @@ export const processAdminRefund = async (
     const deliveryCharge = order?.price_breakdown?.delivery_charge || 0;
 
     // Deduct non-refundable delivery charge from total paid
-    const maxFundableAmount = Math.max(0, totalOrderPrice - deliveryCharge);
+    // const maxFundableAmount =
+    //   order.status === ORDER_STATUS.DELIVERD
+    //     ? Math.max(0, totalOrderPrice - deliveryCharge)
+    //     : totalOrderPrice;
+
+    const maxFundableAmount = Number(totalOrderPrice);
 
     if (maxFundableAmount <= 0) {
       throw new ApiError(
@@ -238,16 +243,7 @@ export const processAdminRefund = async (
 
       // 4. Email to Admin(s)
       try {
-        const admins = await User.find({
-          $or: [{ role: USER_ROLES.ADMIN }, { role: USER_ROLES.SUPER_ADMIN }],
-        });
-        const adminEmails = Array.from(
-          new Set(
-            [...admins.map(a => a.email), config.super_admin.email].filter(
-              Boolean,
-            ),
-          ),
-        );
+        const adminEmails = Array.from(new Set([config.support.order]));
         for (const adminEmail of adminEmails) {
           const adminEmailData = emailTemplate.refundProcessedAdminNotification(
             {
