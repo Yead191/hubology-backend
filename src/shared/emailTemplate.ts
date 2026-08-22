@@ -40,6 +40,11 @@ import {
   refundRejectedUserConfirmation,
   refundProcessedAdminNotification,
 } from '../templates/refundTemplate';
+import {
+  partnerApplicationUserConfirmation,
+  partnerApplicationAdminNotification,
+  partnerStatusUpdate,
+} from '../templates/partnerTemplate';
 
 export const emailTemplate = {
   createAccount,
@@ -68,5 +73,8 @@ export const emailTemplate = {
   refundApprovedUserConfirmation,
   refundRejectedUserConfirmation,
   refundProcessedAdminNotification,
+  partnerApplicationUserConfirmation,
+  partnerApplicationAdminNotification,
+  partnerStatusUpdate,
 };
 

@@ -263,3 +263,27 @@ export type IRefundProcessedAdminNotification = {
   adminNote?: string;
 };
 
+export type IPartnerApplicationUserConfirmation = {
+  email: string;
+  name: string;
+  partnerName: string;
+};
+
+export type IPartnerApplicationAdminNotification = {
+  adminEmail: string;
+  applicantName: string;
+  applicantEmail: string;
+  partnerName: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  website?: string;
+};
+
+export type IPartnerStatusUpdate = {
+  email: string;
+  name: string;
+  partnerName: string;
+  status: string;
+};
+
+

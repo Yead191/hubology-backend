@@ -12,6 +12,9 @@ import { AuthHelper } from '../auth/auth.helper';
 import { Response } from 'express';
 import mongoose from 'mongoose';
 import QueryBuilder from '../../builder/QueryBuilder';
+import { Community } from '../community/community.model';
+import { Comment } from '../comment/comment.model';
+import { Like } from '../like/like.model';
 
 const createUserToDB = async (payload: Partial<IUser>, res: Response) => {
   const isExist = await User.findOne({ email: payload.email });
@@ -198,6 +201,9 @@ const deleteUserService = async (id: string) => {
     unlinkFile(isExistUser.image);
   }
   const result = await User.deleteOne({ _id: id });
+  await Community.deleteMany({ author: id });
+  await Comment.deleteMany({ author: id });
+  await Like.deleteMany({ user: id });
   return result;
 };
 

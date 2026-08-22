@@ -130,6 +130,9 @@ const deletePostFromDB = async (user: JwtPayload, id: string) => {
   if (!isPostExist) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Post doesn't exist!");
   }
+  if (user?.role === USER_ROLES.SUPER_ADMIN) {
+    return await Community.deleteOne({ _id: id });
+  }
   if (isPostExist.author.toString() !== user.id.toString()) {
     throw new ApiError(
       StatusCodes.UNAUTHORIZED,
