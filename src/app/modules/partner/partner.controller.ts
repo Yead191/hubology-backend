@@ -33,7 +33,7 @@ const createPartner = catchAsync(
     if (image) {
       data.image = image;
     }
-
+    // console.log(data, image);
     const result = await PartnerServices.createPartnerToDB(data);
 
     return sendResponse(res, {

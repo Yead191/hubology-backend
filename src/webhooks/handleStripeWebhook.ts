@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import stripe from '../config/stripe';
 import config from '../config';
-import { handleDonationCheckout } from '../handlers/handleDonationCheckout';
 import Stripe from 'stripe';
 import { handleOrderPurchase } from '../handlers/handleOrderPurchase';
 import { handleMembershipCheckout } from '../handlers/handleMembershipCheckout';
@@ -35,9 +34,7 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
     switch (event.type) {
       case 'checkout.session.completed':
         const session = event.data.object as Stripe.Checkout.Session;
-        if (session.metadata?.paymentType === 'donation') {
-          await handleDonationCheckout(session);
-        } else if (session.metadata?.orderId) {
+        if (session.metadata?.orderId) {
           await handleOrderPurchase(session);
         } else if (session.metadata?.type === 'service') {
           await handleServiceBooking(session);
