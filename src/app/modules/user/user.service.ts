@@ -61,10 +61,13 @@ const getUserProfileFromDB = async (
   user: JwtPayload,
 ): Promise<Partial<IUser>> => {
   const { id } = user;
-  const isExistUser = await User.findOne({ _id: id }).populate(
-    'subscription',
-    // 'name start_date end_date status is_trial plan',
-  );
+  const isExistUser = await User.findOne({ _id: id })
+    .populate(
+      'subscription',
+      // 'name start_date end_date status is_trial plan',
+    )
+    .lean()
+    .exec();
   if (!isExistUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
   }
@@ -161,11 +164,11 @@ const getUserService = async (user: JwtPayload, id: any) => {
   console.log(id);
   let result;
 
-  if (user.role === USER_ROLES.ADMIN) {
-    result = await User.findById(id);
+  if (user.role === USER_ROLES.SUPER_ADMIN || user.role === USER_ROLES.ADMIN) {
+    result = await User.findById(id).populate('subscription').lean().exec();
   } else {
     result = await User.findById(id).select(
-      'name email role company interest verified status',
+      'name email role company interest verified status image',
     );
   }
 

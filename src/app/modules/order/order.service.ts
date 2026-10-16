@@ -187,6 +187,34 @@ const getOrdersFromDB = async (
   return { orders, pagination };
 };
 
+const getOrderByIdFromDB = async (user: JwtPayload, id: string) => {
+  const order = await Order.findById(id)
+    .populate({
+      path: 'user',
+      select: 'name email image',
+    })
+    .populate({
+      path: 'refund',
+      select: 'refundAmount refundType status stripeRefundId adminNote',
+    })
+    .lean()
+    .exec();
+  if (!order) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Order not found');
+  }
+  if (
+    user.role !== USER_ROLES.SUPER_ADMIN &&
+    user.role !== USER_ROLES.ADMIN &&
+    order.user.toString() !== user.id
+  ) {
+    throw new ApiError(
+      StatusCodes.FORBIDDEN,
+      'You are not authorized to access this order',
+    );
+  }
+  return order;
+};
+
 const changeOrderStatus = async (id: string, status: ORDER_STATUS) => {
   const order = await Order.findById(id).populate('user');
   if (!order) {
@@ -263,4 +291,5 @@ export const OrderServices = {
   getOrdersFromDB,
   changeOrderStatus,
   deleteOrder,
+  getOrderByIdFromDB,
 };

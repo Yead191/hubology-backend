@@ -17,6 +17,7 @@ router
   .get(auth(), OrderController.getAllOrders);
 router
   .route('/:id')
+  .get(auth(), OrderController.getOrderById)
   .patch(
     auth(),
     validateRequest(OrderValidations.changeOrderStatusZodSchema),
